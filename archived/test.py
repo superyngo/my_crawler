@@ -1,44 +1,17 @@
-# 20240711
-from modules.edge_drivers import *
+# 20240920
+from modules.crawlers_defs import *
 
-def multithreading(lst_source_lists:list, def_def:Callable, num_threads:int):
-    splitted_lists = split_list(lst_source_lists, num_threads)
-    with ThreadPoolExecutor(max_workers=num_threads) as executor:
-        # executor.map(def_def, sources)
-        futures = [executor.submit(def_def, lst_sublist) for lst_sublist in splitted_lists]
-        for future in futures:
-            future.result()
-int_threads=3
-
-def wrapper_thread_init_drivers(sublist):
-    from types import SimpleNamespace
-    global dic_drivers
-    dic_drivers[SimpleNamespace()] = None
-
-multithreading(range(int_threads), wrapper_thread_init_drivers, int_threads)
+a  =CsMultiCrawlersManager(config={'threads':1,'subclass':test}, k=1)
+a._call_instances(handler='bark')('bark')
+a._call_instances(handler='woof')()
+a.change_threads(3)
 
 
-def hi(i,j):
-    print(i, j)
+a=CsMultiCrawlersManager('MSG', config={'threads':2})
+lst_test_reports = [{'name' : 'RS4183MA4L'}]
+a._call_instances(handler='MSG_handler',source=lst_test_reports)
 
-# List of names
-total = 0
-lst_names = ["A", "B", "C", "D", "E"]
-# Call the function to greet names concurrently
-multithreading(lst_names, hi, 2)
+a._call_instances('MASIS_InvQry','ALL',handler='_load_components',source=None)
+a._call_instances('ALL',handler='_remove_components',source=None)
+a._call_instances(handler='bark', source=None, args=[1,2,3], kwargs = {1:1,2:2})
 
-
-from types import SimpleNamespace
-tt={}
-a=SimpleNamespace()
-tt[a]=1
-
-class HashableObject:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-    def __hash__(self):
-        return hash(tuple(sorted(self.__dict__.items())))
-    def __eq__(self, other):
-        if isinstance(other, HashableObject):
-            return self.__dict__ == other.__dict__
-        return False

@@ -795,7 +795,7 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
         return vars()
     return {key: func() for key, func in vars().items()}
 
-dic_components = _create_crawlers_components()
+_dic_components = _create_crawlers_components()
 
 # Procedures
 class CsMyDriver(webdriver.Edge):
@@ -855,7 +855,7 @@ class CsMyDriver(webdriver.Edge):
         super().__init__(service=service, options=options)
         self.int_main_window_handle = self.current_window_handle
 class CsDriverCrawler(CsMyDriver):
-    def __init__(self, *args, dic_components=dic_components):
+    def __init__(self, *args, dic_components=_dic_components):
         super().__init__()
         self.dic_components = dic_components
         self._loaded_components = []
@@ -940,7 +940,7 @@ class test():
         print(kwargs)
 
 class CsMultiCrawlersManager(CsMyClass):
-    default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'dic_components':dic_components}
+    default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'dic_components':_dic_components}
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
         for key, value in self.default_config.items():
             setattr(self, key, config.get(key, value))
@@ -951,7 +951,7 @@ class CsMultiCrawlersManager(CsMyClass):
             source = None,
             call_def = lambda index, **kwargs: self.instances.update({index:self.subclass(**kwargs)}),
             threads = self.threads,
-            kwargs = {'dic_components':dic_components}
+            kwargs = {'dic_components':self.dic_components}
         )
         # load components for crawlers
         self._loaded_instances_components=[]
@@ -1021,7 +1021,7 @@ class CsMultiCrawlersManager(CsMyClass):
                     call_def = lambda *args, index, **kwargs: None if index in self.instances else self.instances.setdefault(index, self.subclass(*args, **kwargs)),
                     threads = threads,
                     args = self._loaded_instances_components,
-                    kwargs = {'dic_components':dic_components}
+                    kwargs = {'dic_components':self.dic_components}
                 )
             case _ if threads < self.threads:
                 for i in range(threads, self.threads):
