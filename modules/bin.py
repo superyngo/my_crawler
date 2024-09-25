@@ -63,13 +63,22 @@ def create_lst_of(n:int, element={'index': None, 'driver': None, 'list': []}):
 
 def multithreading(source:any, call_def:callable, threads:int = 1, args=[], kwargs={}):
     with ThreadPoolExecutor(max_workers=threads) as executor:
-        futures = [
-            executor.submit(call_def, *args, index=index, **kwargs) 
-            for index in list(range(threads))
-            ] if source is None else [
-            executor.submit(call_def, source, *args, index=index, **kwargs)  
-            for index, source in split_to_dict(source, threads).items()
-        ]
+        match source:
+            case None:
+                futures = [
+                    executor.submit(call_def, *args, index=index, **kwargs)  
+                    for index in list(range(threads))
+                ]
+            case list() | dict():
+                futures = [
+                    executor.submit(call_def, source, *args, index=index, **kwargs)  
+                    for index, source in split_to_dict(source, threads).items()
+                ]
+            case _:
+                futures = [
+                    executor.submit(call_def, source, *args, index=index, **kwargs) 
+                    for index in list(range(threads))
+                ] 
         for future in futures:
             future.result()
 
