@@ -940,23 +940,17 @@ class test():
         print(kwargs)
 
 class CsMultiCrawlersManager(CsMyClass):
-    default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'dic_components':_dic_components}
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
-        for key, value in self.default_config.items():
+        default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'dic_components':_dic_components}
+        for key, value in default_config.items():
             setattr(self, '_' + key, config.get(key, value))
         if args:self.args = list(args)
         if kwargs:self.kwargs = kwargs
         # init instances
-        multithreading(
-            source = None,
-            call_def = lambda index, **kwargs: self._instances.update({index:self._subclass(**kwargs)}),
-            threads = self._threads,
-            kwargs = {'dic_components':self._dic_components}
-        )
+        if self._threads > 0:self._init_instances(dic_components = self._dic_components)
         # load components for crawlers
         self._loaded_instances_components=[]
         if args:self._load_instances_components(*args)
-        return
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
     def _load_instances_components(self, *args) -> None:
@@ -995,7 +989,7 @@ class CsMultiCrawlersManager(CsMyClass):
         threads = threads if threads and threads <= self._threads else self._threads
         def _def_wrapper(*args, source:any=None, **kwargs):
             # split source into self._sources
-            if isinstance(source,(list, dict)):
+            if isinstance(source,(list, tuple, dict)):
                 self._sources = {}
                 multithreading(
                     source = source,
@@ -1015,21 +1009,40 @@ class CsMultiCrawlersManager(CsMyClass):
     def threads(self):
         return self._threads
     @threads.setter # Setter
-    def threads(self,threads:int):
+    def threads(self, threads:int):
         if not isinstance(threads, int) or threads<0:raise TypeError(f"threads must > 0")
         match threads:
             case self._threads:
                 fn_log(f"current threads {threads} unchanged")
             case _ if threads > self._threads:
-                multithreading(
-                    source = None,
-                    call_def = lambda *args, index, **kwargs: None if index in self._instances else self._instances.setdefault(index, self._subclass(*args, **kwargs)),
-                    threads = threads,
-                    args = self._loaded_instances_components,
-                    kwargs = {'dic_components':self._dic_components}
-                )
+                self._init_instances(*self._loaded_instances_components, threads = threads, dic_components = self._dic_components)
             case _ if threads < self._threads:
                 for i in range(threads, self._threads):
                     if hasattr(self._instances[i],'close'):self._instances[i].close()
                     self._instances.pop(i)
         self._threads = threads
+    def _init_instances(self, *args, threads:int=None, **kwargs):
+        def _init_instance(*args, index, **kwargs):
+            if index in self._instances:
+                return
+            self._instances.update({index:self._subclass(*args, **kwargs)})
+            if hasattr(self._instances[index],'login_cht'):
+                self._instances[index].login_cht()
+        multithreading(
+            source = None,
+            call_def = _init_instance,
+            threads = self._threads if threads is None else threads,
+            args = args,
+            kwargs = kwargs
+        )
+    def crawling_main(self, source, task, threads=None, **kwargs):
+        fn_log(f"Total contracts count : {len(source)}")
+        
+        # change threads if needed
+        if threads : self.threads = threads
+        
+        # load task
+        if task not in self._loaded_instances_components : self._load_instances_components(task)
+        
+        # execute
+        getattr(self, task + '_handler')(source = source, **kwargs)

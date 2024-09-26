@@ -1,25 +1,7 @@
-# 20240920
-# fetch contracts info, items, types
-from modules.crawlers_defs import *
-from data.source_contracts import lst_source_contracts
-multi_driver_crawler = None 
-# lst_source_contracts = ["23S13A0041","23R13A0051"]
-source = lst_source_contracts
-task = 'EPIS_contract_batch'
-
-def main():
-    global multi_driver_crawler
-    fn_log(f"Total contracts count : {len(source)}")
-    
-    # Start driver
-    if multi_driver_crawler:
-        multi_driver_crawler._load_instances_components(task)
-    else:
-        multi_driver_crawler = CsMultiCrawlersManager(task)
-        multi_driver_crawler._call_instances('login_cht')()
-
-    # EPIS_contract_info_items
-    multi_driver_crawler.EPIS_contract_info_items_handler(source = source)
+# 20240926
+from data.configs import *
 
 if __name__ == "__main__":
-    main()
+    multi_driver_crawler = multi_driver_crawler or CsMultiCrawlersManager()
+    multi_driver_crawler.crawling_main(**configs['EPIS_contract_info_items'])
+

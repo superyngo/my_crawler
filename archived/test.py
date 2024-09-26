@@ -1,7 +1,9 @@
 # 20240920
 from modules.crawlers_defs import *
 
-a  = CsMultiCrawlersManager(config={'threads':1,'subclass':test}, k=1)
+a=CsMultiCrawlersManager('MSG')
+a  = CsMultiCrawlersManager(config={'threads':2,'subclass':test}, k=1)
+b  = CsMultiCrawlersManager(config={'threads':5,'subclass':test}, k=1)
 a._call_instances(handler='bark')(1,2,3,source='bark',k=1)
 a._call_instances(handler='woof')()
 a.threads

@@ -43,7 +43,7 @@ def split_list(input_list:list, num:int=1):
     return result
 
 def split_to_dict(source:any, num:int=1) -> dict[int, any]:
-    def _list(_list:list, num:int=1)->dict[int, any]:
+    def _list(_list, num:int=1)->dict[int, any]:
         if len(_list) < num:
             num=len(_list)
         # Create a dictionary with empty lists for each key
@@ -52,11 +52,11 @@ def split_to_dict(source:any, num:int=1) -> dict[int, any]:
         for i, val in enumerate(_list):
             result[i % num].append(val)
         return result
-    if isinstance(source, list):
+    if isinstance(source, (list,tuple)):
         return _list(source, num)
     if isinstance(source, dict):
         return {k: dict(v) for k, v in _list(source.items(), num).items()}
-    raise TypeError("source must be type list or dictionary")
+    raise TypeError("source must be type list, tuple or dictionary")
 
 def create_lst_of(n:int, element={'index': None, 'driver': None, 'list': []}):
     return [element for _ in range(n)]
@@ -69,7 +69,7 @@ def multithreading(source:any, call_def:callable, threads:int = 1, args=[], kwar
                     executor.submit(call_def, *args, index=index, **kwargs)  
                     for index in list(range(threads))
                 ]
-            case list() | dict():
+            case list() | tuple() | dict():
                 futures = [
                     executor.submit(call_def, *args, source=splitted_source, index=index, **kwargs)  
                     for index, splitted_source in split_to_dict(source, threads).items()
