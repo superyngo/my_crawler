@@ -319,9 +319,21 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                 _result = re.sub(r'\n|\t|\s|\r', '', _result, flags=re.DOTALL)
                 _result = _result.replace(r'][', '],[')
                 # Convert the string to a list
-                _result = self._process_data(ast.literal_eval(_result))
+                _result = self. _MASIS_InvQry_process_data(ast.literal_eval(_result))
                 lst_data += _result
             return lst_data
+        def _MASIS_InvQry_process_data(self, data):
+            for item in data:
+                # Split the third element
+                third_element = item[2]
+                if '(' in third_element:
+                    split_elem = third_element.split('(', 1)
+                    item[2] = split_elem[0]
+                    item.insert(3, '(' + split_elem[1])
+                # Remove the first and last letter of the fourth element (now the element at index 3)
+                if len(item[3]) > 2:  # Ensure the element is long enough
+                    item[3] = item[3][1:-1]
+            return data
         return vars()
     def EPIS_contract_info_items() -> dict[str, any]:
         def EPIS_contract_info_items_handler(self, source:list[str], index:int = 0):
@@ -764,7 +776,6 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     db.execute_many(insert_replace_sql , value)
                     fn_log(f"{index}:contract batches saved to db {tablename}")
         return vars()
-    # Share Point
     def sharepoint() -> dict[str, any]:
         def sharepoint_check_online(self, source:CsMSGReport, index:int = 0) ->bool:
             self.get(f"{self._sharepoint_base_url}{source.name}/")
@@ -794,8 +805,69 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
     return {key: func() for key, func in vars().items()}
+def _create_loader_components() -> dict[str, callable]:
+    def _load_components(self, *args) -> None:
+        if 'ALL' in args:
+            args = list(self._crawlers_components.keys())
+        for task in args:
+            if task in self._loaded_components:
+                fn_log(f"{task} has already been loaded so skip")
+                continue
+            if task in list(self._crawlers_components.keys()) + ['ALL']:
+                for key, value in self._crawlers_components[task].items():
+                    if key == '__init__':
+                        value(self)
+                    else:
+                        setattr(self, key, MethodType(value, self) if callable(value) else value)
+            else:
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
+            self._loaded_components += [task]
+            fn_log(f"{task} loaded successfully")
+        return None
+    def _remove_components(self, *args) -> None:
+        if 'ALL' in args:
+            args = list(self._crawlers_components.keys())
+        for task in args:
+            if task in self._loaded_components:
+                for key in self._crawlers_components[task].keys():
+                    if key == '__init__':
+                        continue
+                    if hasattr(self, key):
+                        delattr(self, key)
+                self._loaded_components.remove(task)
+                fn_log(f"{task} removed successfully")
+            else:
+                raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
+        return None
+    return vars()
+def _create_common_crawlers_components() -> dict[str, any]:
+    def login_cht(self) -> object:
+        OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
+        self.get(OTP_LOGIN_URL)
+        self._wait_element(By.ID, 'orientation')
+        self.switch_to.window(self.window_handles[-1])
+        self.close()
+        self.switch_to.window(self.window_handles[0])
+        return self
+    def _try_currency(self):
+        try:
+            _str = self.find_element(By.XPATH, "//span[contains(text(), 'US$') or contains(text(), '€')]").text
+            _pattern = r'US\$|€'
+            match = re.search(_pattern, _str).group()
+            if match == '€':
+                return match
+            return 'US\\$'
+        except Exception:
+            return False
+    def __init__(self, *args, crawlers_components) -> None:
+        self._crawlers_components = crawlers_components
+        self._loaded_components = []
+        self._load_components(*args)
+    return vars()
 
-_dic_components = _create_crawlers_components()
+_loader_components = _create_loader_components()
+_common_crawlers_components = _create_common_crawlers_components()
+_crawlers_components = _create_crawlers_components()
 
 # Procedures
 class CsMyDriver(webdriver.Edge):
@@ -855,77 +927,16 @@ class CsMyDriver(webdriver.Edge):
         super().__init__(service=service, options=options)
         self.int_main_window_handle = self.current_window_handle
 class CsDriverCrawler(CsMyDriver):
-    def __init__(self, *args, dic_components=_dic_components):
+    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), crawlers_components=_crawlers_components):
         super().__init__()
-        self._dic_components = dic_components
-        self._loaded_components = []
-        self._load_components(*args)
-        return None
+        for key, value in basic_components.items():
+            if key == '__init__':
+                value(self , *args, crawlers_components=crawlers_components)
+            else:
+                setattr(self, key, MethodType(value, self) if callable(value) else value)
+        return
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
-    def _load_components(self, *args) -> None:
-        if 'ALL' in args:
-            args = list(self._dic_components.keys())
-        for task in args:
-            if task in self._loaded_components:
-                fn_log(f"{task} has already been loaded so skip")
-                continue
-            if task in list(self._dic_components.keys()) + ['ALL']:
-                for key, value in self._dic_components[task].items():
-                    if key == '__init__':
-                        value(self)
-                    else:
-                        setattr(self, key, MethodType(value, self) if callable(value) else value)
-            else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._dic_components.keys())} or 'ALL' ")
-            self._loaded_components += [task]
-            fn_log(f"{task} loaded successfully")
-        return None
-    def _remove_components(self, *args) -> None:
-        if 'ALL' in args:
-            args = list(self._dic_components.keys())
-        for task in args:
-            if task in self._loaded_components:
-                for key in self._dic_components[task].keys():
-                    if key == '__init__':
-                        continue
-                    if hasattr(self, key):
-                        delattr(self, key)
-                self._loaded_components.remove(task)
-                fn_log(f"{task} removed successfully")
-            else:
-                raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
-        return None
-    def login_cht(self) -> object:
-        OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
-        self.get(OTP_LOGIN_URL)
-        self._wait_element(By.ID, 'orientation')
-        self.switch_to.window(self.window_handles[-1])
-        self.close()
-        self.switch_to.window(self.window_handles[0])
-        return self
-    def _try_currency(self):
-        try:
-            _str = self.find_element(By.XPATH, "//span[contains(text(), 'US$') or contains(text(), '€')]").text
-            _pattern = r'US\$|€'
-            match = re.search(_pattern, _str).group()
-            if match == '€':
-                return match
-            return 'US\\$'
-        except Exception:
-            return False
-    def _process_data(self, data):
-        for item in data:
-            # Split the third element
-            third_element = item[2]
-            if '(' in third_element:
-                split_elem = third_element.split('(', 1)
-                item[2] = split_elem[0]
-                item.insert(3, '(' + split_elem[1])
-            # Remove the first and last letter of the fourth element (now the element at index 3)
-            if len(item[3]) > 2:  # Ensure the element is long enough
-                item[3] = item[3][1:-1]
-        return data
 
 class test():
     def __init__(self, *args, **kwargs):
@@ -941,13 +952,13 @@ class test():
 
 class CsMultiCrawlersManager(CsMyClass):
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
-        default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'dic_components':_dic_components}
+        default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'crawlers_components':_crawlers_components}
         for key, value in default_config.items():
             setattr(self, '_' + key, config.get(key, value))
         if args:self.args = list(args)
         if kwargs:self.kwargs = kwargs
         # init instances
-        if self._threads > 0:self._init_instances(dic_components = self._dic_components)
+        if self._threads > 0:self._init_instances(crawlers_components = self._crawlers_components)
         # load components for crawlers
         self._loaded_instances_components=[]
         if args:self._load_instances_components(*args)
@@ -955,20 +966,20 @@ class CsMultiCrawlersManager(CsMyClass):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
     def _load_instances_components(self, *args, threads=None) -> None:
         if 'ALL' in args:
-            args = list(self._dic_components.keys())
+            args = list(self._crawlers_components.keys())
         for task in args:
             if task in self._loaded_instances_components:
                 fn_log(f"{task} has already been loaded so skip")
                 continue
-            if task in list(self._dic_components.keys()) + ['ALL']:
+            if task in list(self._crawlers_components.keys()) + ['ALL']:
                 # load component for instances
                 self._call_instances(handler='_load_components')(task)
                 # set handler entrance for multi_manager
-                for key in self._dic_components[task].keys():
+                for key in self._crawlers_components[task].keys():
                     if 'handler' in key:
                         setattr(self, key, self._call_instances(handler=key, threads=threads))
             else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._dic_components.keys())} or 'ALL' ")
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
             self._loaded_instances_components += [task]
             fn_log(f"{task} entry loaded successfully")
     def _remove_instances_components(self, *args) -> None:
@@ -977,7 +988,7 @@ class CsMultiCrawlersManager(CsMyClass):
             if task in self._loaded_instances_components:
                 # remove component for instances
                 self._call_instances('_remove_components')(task)
-                for key in self._dic_components[task].keys():
+                for key in self._crawlers_components[task].keys():
                     if 'handler' in key and hasattr(self, key):
                         delattr(self, key)
                 self._loaded_instances_components.remove(task)
@@ -1015,7 +1026,7 @@ class CsMultiCrawlersManager(CsMyClass):
             case self._threads:
                 fn_log(f"current threads {threads} unchanged")
             case _ if threads > self._threads:
-                self._init_instances(*self._loaded_instances_components, threads = threads, dic_components = self._dic_components)
+                self._init_instances(*self._loaded_instances_components, threads = threads, crawlers_components = self._crawlers_components)
             case _ if threads < self._threads:
                 for i in range(threads, self._threads):
                     if hasattr(self._instances[i],'close'):self._instances[i].close()
