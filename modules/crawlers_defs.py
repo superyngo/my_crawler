@@ -863,6 +863,7 @@ def _create_common_crawlers_components() -> dict[str, any]:
         self._crawlers_components = crawlers_components
         self._loaded_components = []
         self._load_components(*args)
+        if 'sharepoint' not in args:self.login_cht()
     return vars()
 
 _loader_components = _create_loader_components()
@@ -938,6 +939,15 @@ class CsDriverCrawler(CsMyDriver):
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
 
+class Composer:
+    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), crawlers_components=_crawlers_components):
+        super().__init__()
+        for key, value in basic_components.items():
+            if key == '__init__':
+                value(self , *args, crawlers_components=crawlers_components)
+            else:
+                setattr(self, key, MethodType(value, self) if callable(value) else value)
+        return
 class test():
     def __init__(self, *args, **kwargs):
         if args:self.args=list(args)
@@ -949,6 +959,7 @@ class test():
     def woof(self, *args, **kwargs):
         print(list(args))
         print(kwargs)
+
 
 class CsMultiCrawlersManager(CsMyClass):
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
@@ -1037,8 +1048,6 @@ class CsMultiCrawlersManager(CsMyClass):
             if index in self._instances:
                 return
             self._instances.update({index:self._subclass(*args, **kwargs)})
-            if hasattr(self._instances[index],'login_cht'):
-                self._instances[index].login_cht()
         multithreading(
             source = None,
             call_def = _init_instance,
@@ -1057,3 +1066,22 @@ class CsMultiCrawlersManager(CsMyClass):
         
         # execute
         getattr(self, task + '_handler')(source = source, **kwargs)
+def composer_factory(*args, cs=None, basic_components, main_components, super_args=[], super_kwargs={}, **kwargs):
+    match cs:
+        case None:
+            class _():
+                pass
+        case _:
+            class _(cs):
+                pass
+    def __init__(self, *args, basic_components, main_components, **kwargs):
+        super().__init__(*super_args, **super_kwargs)
+        for key, value in basic_components.items():
+            if key == '__init__':
+                value(self , *args, main_components=main_components, **kwargs)
+            else:
+                setattr(self, key, MethodType(value, self) if callable(value) else value)
+        return
+    _.__init__ = __init__
+    return _(*args, **kwargs)
+

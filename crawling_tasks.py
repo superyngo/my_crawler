@@ -40,9 +40,9 @@ configs = {
     'task' : 'MASIS_InvQry',
     'threads' : 1
 }}
+multi_driver_crawler = multi_driver_crawler or CsMultiCrawlersManager('sharepoint')
 
 if __name__ == "__main__":
-    multi_driver_crawler = multi_driver_crawler or CsMultiCrawlersManager()
     multi_driver_crawler.crawling_main(**configs['MSG'])
     multi_driver_crawler._remove_instances_components('MASIS_InvQry')
     multi_driver_crawler.crawling_main(**(configs['MASIS_InvQry'] | {'threads':2,'source' : ['50502', '50503']}))
