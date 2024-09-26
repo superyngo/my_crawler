@@ -1,11 +1,20 @@
 # 20240920
 from modules.crawlers_defs import *
 
-a  =CsMultiCrawlersManager(config={'threads':1,'subclass':test}, k=1)
-a._call_instances(handler='bark')('bark')
+a  = CsMultiCrawlersManager(config={'threads':1,'subclass':test}, k=1)
+a._call_instances(handler='bark')(1,2,3,source='bark',k=1)
 a._call_instances(handler='woof')()
-a.change_threads(3)
-
+a.threads
+a._instances
+a.threads = 3
+a._instances
+a.threads
+a.threads = 0
+a._instances
+a.threads
+a.threads = 3
+a._instances
+a.threads
 
 a=CsMultiCrawlersManager('MSG', config={'threads':2})
 lst_test_reports = [{'name' : 'RS4183MA4L'}]

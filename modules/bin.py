@@ -71,12 +71,12 @@ def multithreading(source:any, call_def:callable, threads:int = 1, args=[], kwar
                 ]
             case list() | dict():
                 futures = [
-                    executor.submit(call_def, source, *args, index=index, **kwargs)  
-                    for index, source in split_to_dict(source, threads).items()
+                    executor.submit(call_def, *args, source=splitted_source, index=index, **kwargs)  
+                    for index, splitted_source in split_to_dict(source, threads).items()
                 ]
             case _:
                 futures = [
-                    executor.submit(call_def, source, *args, index=index, **kwargs) 
+                    executor.submit(call_def, *args, source=source, index=index, **kwargs) 
                     for index in list(range(threads))
                 ] 
         for future in futures:

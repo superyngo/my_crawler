@@ -857,7 +857,7 @@ class CsMyDriver(webdriver.Edge):
 class CsDriverCrawler(CsMyDriver):
     def __init__(self, *args, dic_components=_dic_components):
         super().__init__()
-        self.dic_components = dic_components
+        self._dic_components = dic_components
         self._loaded_components = []
         self._load_components(*args)
         return None
@@ -865,28 +865,28 @@ class CsDriverCrawler(CsMyDriver):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
     def _load_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self.dic_components.keys())
+            args = list(self._dic_components.keys())
         for task in args:
             if task in self._loaded_components:
                 fn_log(f"{task} has already been loaded so skip")
                 continue
-            if task in list(self.dic_components.keys()) + ['ALL']:
-                for key, value in self.dic_components[task].items():
+            if task in list(self._dic_components.keys()) + ['ALL']:
+                for key, value in self._dic_components[task].items():
                     if key == '__init__':
                         value(self)
                     else:
                         setattr(self, key, MethodType(value, self) if callable(value) else value)
             else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self.dic_components.keys())} or 'ALL' ")
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._dic_components.keys())} or 'ALL' ")
             self._loaded_components += [task]
             fn_log(f"{task} loaded successfully")
         return None
     def _remove_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self.dic_components.keys())
+            args = list(self._dic_components.keys())
         for task in args:
             if task in self._loaded_components:
-                for key in self.dic_components[task].keys():
+                for key in self._dic_components[task].keys():
                     if key == '__init__':
                         continue
                     if hasattr(self, key):
@@ -931,7 +931,7 @@ class test():
     def __init__(self, *args, **kwargs):
         if args:self.args=list(args)
         if kwargs:self.kwargs=kwargs
-    def bark(self, source, *args, **kwargs):
+    def bark(self, *args, source, **kwargs):
         print(source)
         print(list(args))
         print(kwargs)
@@ -943,15 +943,15 @@ class CsMultiCrawlersManager(CsMyClass):
     default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'dic_components':_dic_components}
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
         for key, value in self.default_config.items():
-            setattr(self, key, config.get(key, value))
+            setattr(self, '_' + key, config.get(key, value))
         if args:self.args = list(args)
         if kwargs:self.kwargs = kwargs
         # init instances
         multithreading(
             source = None,
-            call_def = lambda index, **kwargs: self.instances.update({index:self.subclass(**kwargs)}),
-            threads = self.threads,
-            kwargs = {'dic_components':self.dic_components}
+            call_def = lambda index, **kwargs: self._instances.update({index:self._subclass(**kwargs)}),
+            threads = self._threads,
+            kwargs = {'dic_components':self._dic_components}
         )
         # load components for crawlers
         self._loaded_instances_components=[]
@@ -961,20 +961,20 @@ class CsMultiCrawlersManager(CsMyClass):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
     def _load_instances_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self.dic_components.keys())
+            args = list(self._dic_components.keys())
         for task in args:
             if task in self._loaded_instances_components:
                 fn_log(f"{task} has already been loaded so skip")
                 continue
-            if task in list(self.dic_components.keys()) + ['ALL']:
+            if task in list(self._dic_components.keys()) + ['ALL']:
                 # load component for instances
                 self._call_instances(handler='_load_components')(task)
                 # set handler entrance for multi_manager
-                for key in self.dic_components[task].keys():
+                for key in self._dic_components[task].keys():
                     if 'handler' in key:
                         setattr(self, key, self._call_instances(key))
             else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self.dic_components.keys())} or 'ALL' ")
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._dic_components.keys())} or 'ALL' ")
             self._loaded_instances_components += [task]
             fn_log(f"{task} entry loaded successfully")
     def _remove_instances_components(self, *args) -> None:
@@ -983,7 +983,7 @@ class CsMultiCrawlersManager(CsMyClass):
             if task in self._loaded_instances_components:
                 # remove component for instances
                 self._call_instances('_remove_components')(task)
-                for key in self.dic_components[task].keys():
+                for key in self._dic_components[task].keys():
                     if 'handler' in key and hasattr(self, key):
                         delattr(self, key)
                 self._loaded_instances_components.remove(task)
@@ -991,40 +991,45 @@ class CsMultiCrawlersManager(CsMyClass):
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
     def _call_instances(self, handler:str, threads:str=None):
-        threads = threads if threads and threads <= self.threads else self.threads
-        def _def_wrapper(source:any=None, args:list=[], kwargs:dict={}):
-            # split source into self.sources
+        if self._threads==0:raise ValueError('current there is no thread')
+        threads = threads if threads and threads <= self._threads else self._threads
+        def _def_wrapper(*args, source:any=None, **kwargs):
+            # split source into self._sources
             if isinstance(source,(list, dict)):
-                self.sources = {}
+                self._sources = {}
                 multithreading(
                     source = source,
-                    call_def = lambda source, index:self.sources.update({index: source}),
+                    call_def = lambda source, index:self._sources.update({index: source}),
                     threads = threads,
                 )
             # execute instances def
             multithreading(
                 source = source,
-                call_def = lambda *args, index, **kwargs:getattr(self.instances[index], handler)(*args, **kwargs),
+                call_def = lambda *args, index, **kwargs:getattr(self._instances[index], handler)(*args, **kwargs),
                 threads = threads,
                 args = args,
                 kwargs = kwargs
             )
         return _def_wrapper
-    def change_threads(self, threads:str) -> object:
+    @property # Getter
+    def threads(self):
+        return self._threads
+    @threads.setter # Setter
+    def threads(self,threads:int):
         if not isinstance(threads, int) or threads<0:raise TypeError(f"threads must > 0")
         match threads:
-            case self.threads:
+            case self._threads:
                 fn_log(f"current threads {threads} unchanged")
-            case _ if threads > self.threads:
+            case _ if threads > self._threads:
                 multithreading(
                     source = None,
-                    call_def = lambda *args, index, **kwargs: None if index in self.instances else self.instances.setdefault(index, self.subclass(*args, **kwargs)),
+                    call_def = lambda *args, index, **kwargs: None if index in self._instances else self._instances.setdefault(index, self._subclass(*args, **kwargs)),
                     threads = threads,
                     args = self._loaded_instances_components,
-                    kwargs = {'dic_components':self.dic_components}
+                    kwargs = {'dic_components':self._dic_components}
                 )
-            case _ if threads < self.threads:
-                for i in range(threads, self.threads):
-                    if hasattr(self.instances[i],'close'):self.instances[i].close()
-                    self.instances.pop(i)
-        self.threads = threads
+            case _ if threads < self._threads:
+                for i in range(threads, self._threads):
+                    if hasattr(self._instances[i],'close'):self._instances[i].close()
+                    self._instances.pop(i)
+        self._threads = threads
