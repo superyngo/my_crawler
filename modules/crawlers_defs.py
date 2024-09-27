@@ -168,9 +168,9 @@ class CsSplittedDrivers(CsMyClass):
         data:list
     __slots__ = list(CsSlotTypes.__annotations__.keys())
 
-def _create_crawlers_components() -> dict[str, dict[str, Any]]:
+def _store_crawlers_components() -> dict[str, dict[str, Any]]:
     def MSG() -> dict[str, any]:
-        def MSG_handler(self, source:list[str], index:int=0, handle_check_online:bool=True) -> None:
+        def MSG_handler(self, source:list[str], handle_check_online:bool=True, **kwargs) -> None:
             _BASE_URL = 'https://msgrpt.cht.com.tw/RsView12/RsPortal.aspx'
             self.get(_BASE_URL)
             # Login to sharepoint
@@ -181,11 +181,11 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                 report = CsMSGReport(**report)
                 # check if exited online
                 if handle_check_online and driver_sharepoint.sharepoint_check_online(report):
-                    fn_log(f"{index}:{report.new_name} already uploaded!")
+                    fn_log(f"{self._index}:{report.new_name} already uploaded!")
                     continue
                 # fetch
-                fn_log(f"{index}:Start fetching {report.prefix} {report.name} {report.postfix if report.postfix else ""}")
-                fn_log(f"{index}:Fetching {report.new_name} {self._MSG_query(report = report)}!!")
+                fn_log(f"{self._index}:Start fetching {report.prefix} {report.name} {report.postfix if report.postfix else ""}")
+                fn_log(f"{self._index}:Fetching {report.new_name} {self._MSG_query(report = report)}!!")
                 while not os.path.exists(report.old_path):
                     time.sleep(3)
                 # Rename and move
@@ -196,8 +196,8 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     fn_log(f"{report.new_path} already exists")
                 # upload
                 if handle_check_online:
-                    fn_log(f"{index}:Start uploading {report.new_path}, please wait for uploading.")
-                    fn_log(f"{index}:Upload {report.new_path} {driver_sharepoint.sharepoint_upload(report)}!!")
+                    fn_log(f"{self._index}:Start uploading {report.new_path}, please wait for uploading.")
+                    fn_log(f"{self._index}:Upload {report.new_path} {driver_sharepoint.sharepoint_upload(report)}!!")
             if handle_check_online:
                 driver_sharepoint.close()
         def _MSG_query(self, report:CsMSGReport) -> None:
@@ -242,7 +242,7 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     while not os.path.exists(report.old_path):
                         time.sleep(3)
                     time.sleep(3)
-                    fn_log(f"{index}:{report.old_path} downloaded!!")
+                    fn_log(f"{self._index}:{report.old_path} downloaded!!")
                     # switch to main
                     if report.show_report:
                         self.switch_to.window(str_report_handle)
@@ -257,27 +257,27 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
         def __init__(self) -> None:
             print('MSG component equipped!!')
     def MASIS_InvQry() -> dict[str, any]:
-        def MASIS_InvQry_handler(self, source:list[str], index:int=0) -> None:
+        def MASIS_InvQry_handler(self, source:list[str], **kwargs) -> None:
             _BASE_URL = 'https://masis.cht.com.tw/IV_Net/IvQry/Inv/InvQry.aspx'
             _task_name = 'MASIS_InvQry'
             self.get(_BASE_URL)
             # main
             for txtWhno in source:     
                 lst_data = []   
-                fn_log(f"{index}:start fetching {txtWhno} inventory")
+                fn_log(f"{self._index}:start fetching {txtWhno} inventory")
                 # Input contract ID
                 lst_data = self._MASIS_InvQry_query(txtWhno = txtWhno)
                 with DatabaseManager(DB_PATH) as db:
                     # DELETE operation
                     db.execute_query(f"DELETE FROM {_task_name} WHERE 庫號 = '{txtWhno}'")
                     if len(lst_data) == 0:
-                        fn_log(f"{index}:{txtWhno} has no inventory")
+                        fn_log(f"{self._index}:{txtWhno} has no inventory")
                         continue
-                    fn_log(f"{index}:{txtWhno} inventory fetched")
+                    fn_log(f"{self._index}:{txtWhno} inventory fetched")
                     # Prepare the SQL query
                     lst_sql_columns = ['項次', '庫號', '材料編號', '名稱', '料別', '呆料', '最高庫存', '實際庫存', '可用庫存', '待收數', '待退數', '待調出數', '待撥入數', '待發數', '安全存量', '上月結存數', '上月單價', '累退數', '累調出數', '累撥入數', '累領數', '料位', '管料員']
                     db.write_db(dbname=_task_name, columns=lst_sql_columns, records=lst_data)
-                fn_log(f"{index}:{txtWhno} inventory {len(lst_data)} records saved")
+                fn_log(f"{self._index}:{txtWhno} inventory {len(lst_data)} records saved")
         def _MASIS_InvQry_query(self, txtWhno:str) -> list:
             self._input_send_keys(By.ID, 'ContentPlaceHolder1_txtWhno', txtWhno)
             self._wait_element(By.ID, 'ContentPlaceHolder1_btnQry').click()
@@ -336,7 +336,7 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
             return data
         return vars()
     def EPIS_contract_info_items() -> dict[str, any]:
-        def EPIS_contract_info_items_handler(self, source:list[str], index:int = 0):
+        def EPIS_contract_info_items_handler(self, source:list[str], **kwargs):
             EPIS_contract_info_task_name, EPIS_contract_items_task_name = 'EPIS_contract_info', 'EPIS_contract_items'
             int_total = len(source)
             int_finished_count = 0
@@ -351,24 +351,24 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                 # fetch info
                 lst_info_data = []
                 try:
-                    fn_log(f"{index}:Start fetching {contract} info.")
+                    fn_log(f"{self._index}:Start fetching {contract} info.")
                     lst_info_data = [contract] + self._EPIS_contract_info_query(contract = contract)
-                    fn_log(f"{index}:Fetching {contract} info succeed, proceed to fetch items.")
+                    fn_log(f"{self._index}:Fetching {contract} info succeed, proceed to fetch items.")
                 except TimeoutException:
-                    fn_log(f"{index}:{contract} has no info data. {int_finished_count} of {int_total} finished")
+                    fn_log(f"{self._index}:{contract} has no info data. {int_finished_count} of {int_total} finished")
                     continue
                 # fetch items
                 lst_items_data = []
                 try:
-                    fn_log(f"{index}:Start fetching {contract} items.")
+                    fn_log(f"{self._index}:Start fetching {contract} items.")
                     lst_items_data = self._EPIS_contract_items_query(contract = contract)
                     # sample out corresponding columns and type
                     lst_items_sql_columns, str_type = DIC_COLUMNS_NAMES_CONTRACT_ITEMS[len(lst_items_data[0])]
-                    fn_log(f"{index}:{contract} items fetched. {int_finished_count} of {int_total} finished")
+                    fn_log(f"{self._index}:{contract} items fetched. {int_finished_count} of {int_total} finished")
                 except UnexpectedAlertPresentException:
                     pass
                 except TimeoutException:
-                    fn_log(f"{index}:{contract} has no items data. {int_finished_count} of {int_total} finished")
+                    fn_log(f"{self._index}:{contract} has no items data. {int_finished_count} of {int_total} finished")
                     continue
                 with DatabaseManager(DB_PATH) as db:
                     # Write contract info
@@ -380,8 +380,8 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     db.execute_query(f"DELETE FROM {EPIS_contract_items_task_name} WHERE 契約編號 = '{contract}'")
                     # Write contract items
                     db.write_db(dbname=EPIS_contract_items_task_name, columns=lst_items_sql_columns, records=lst_items_data)
-                fn_log(f"{index}:{contract} info saved to {EPIS_contract_info_task_name}!")
-                fn_log(f"{index}:{contract} items saved to {EPIS_contract_items_task_name}!")
+                fn_log(f"{self._index}:{contract} info saved to {EPIS_contract_info_task_name}!")
+                fn_log(f"{self._index}:{contract} items saved to {EPIS_contract_items_task_name}!")
         # EPIS_contract_info
         def _EPIS_contract_info_query(self, contract:str) -> list:
             BASE_URL = 'https://epis.cht.com.tw/epis100/Pages/GContract/Contract.aspx?f=G_ContractEdit&cid='
@@ -483,7 +483,7 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                 raise TimeoutException
         return vars()
     def MASIS_barcode() -> dict[str, any]:
-        def MASIS_barcode_handler(self, source:dict[str,list[any]], index:int = 0) -> None:
+        def MASIS_barcode_handler(self, source:dict[str,list[any]], **kwargs) -> None:
             _task_name = 'MASIS_barcode'
             STR_MASIS_BARCODE_URL = 'https://masis.cht.com.tw/IV_Net/IvQry/Inv/BarcodeQry.aspx'
             self.get(STR_MASIS_BARCODE_URL)
@@ -503,16 +503,16 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     #     fn_log(f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{key}_{zfill_lot} already existed!!")
                     #     continue
                     try:
-                        fn_log(f"{index}:Fetching {key} {zfill_lot} data")
+                        fn_log(f"{self._index}:Fetching {key} {zfill_lot} data")
                         lst_data:list[list[str]] = [[key , zfill_lot] + lst for lst in self._MASIS_barcode_query_lot(zfill_lot)]
-                        fn_log(f"{index}:{key} {zfill_lot} barcode fetched")
+                        fn_log(f"{self._index}:{key} {zfill_lot} barcode fetched")
                         with DatabaseManager(DB_PATH) as db:
                             # Prepare the SQL query
                             lst_sql_columns = ['契約編號', '批次', '材料編號', '棧板序號', '箱號', 'EAN號碼', '序號', '廠商自編序號', 'MAC位址', '所在庫號', '狀態', '最近領料庫號', '最近領料單號']
                             db.write_db(dbname=_task_name, columns=lst_sql_columns, records=lst_data)
-                        fn_log(f"{index}:{key} {zfill_lot} {len(lst_data)} barcode saved to db {_task_name}, {int_finished_count} of {int_total_lots} finished")
+                        fn_log(f"{self._index}:{key} {zfill_lot} {len(lst_data)} barcode saved to db {_task_name}, {int_finished_count} of {int_total_lots} finished")
                     except UnexpectedAlertPresentException:
-                        fn_log(f"{index}:{key} {zfill_lot} has no barcode. {int_finished_count} of {int_total_lots} finished")
+                        fn_log(f"{self._index}:{key} {zfill_lot} has no barcode. {int_finished_count} of {int_total_lots} finished")
                         continue
         def _MASIS_barcode_query_lot(self, zfill_lot:str) -> list[list[str]]:
             # Input Lot No.
@@ -570,7 +570,7 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
             # fn_log(f"{key}_{zfill_lot}.xlsx saved!! {int_finished_count} of {int_total_lots} finished")
             pass
     def MASIS_item_detail() -> dict[str, any]:
-        def MASIS_item_detail_handler(self, source:list[str], index:int = 0):
+        def MASIS_item_detail_handler(self, source:list[str], **kwargs):
             _task_name = 'MASIS_item_detail'
             _BASE_URL = 'https://masis.cht.com.tw/masis/NM/Mano/ManoMtn.aspx?t=m'
             self.get(_BASE_URL)
@@ -581,21 +581,21 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
             for item in source:        
                 int_finished_count += 1
                 try:
-                    fn_log(f"{index}:Fetching {item} details")
+                    fn_log(f"{self._index}:Fetching {item} details")
                     lst_item_detail = self.MASIS_item_detail_query_item(item)
                     lst_result_items_detail.append([item] +  lst_item_detail)
-                    fn_log(f"{index}:Fetching {item} succeeded, {int_finished_count} of {int_total_lots} finished!!")
+                    fn_log(f"{self._index}:Fetching {item} succeeded, {int_finished_count} of {int_total_lots} finished!!")
                 except UnexpectedAlertPresentException:
-                    fn_log(f"{index}:{item} doesn't exist. {int_finished_count} of {int_total_lots} queried.")
+                    fn_log(f"{self._index}:{item} doesn't exist. {int_finished_count} of {int_total_lots} queried.")
                     continue
             if len(lst_result_items_detail) == 0:
-                fn_log(f"{index}:items has no data")
+                fn_log(f"{self._index}:items has no data")
                 return
-            fn_log(f"{index}:{len(lst_result_items_detail)} items data fetched")
+            fn_log(f"{self._index}:{len(lst_result_items_detail)} items data fetched")
             with DatabaseManager(DB_PATH) as db:
                 lst_sql_columns = ['材料編號', '材料名稱', '材料分類1', '材料分類2', '材料分類3', '計量單位', '追蹤週期', '導入條碼', 'EAN', '管理人員', '建檔日期', '異動日期']
                 db.write_db(dbname=_task_name, columns=lst_sql_columns , records=lst_result_items_detail)
-                fn_log(f"{index}:{len(lst_result_items_detail)} items data saved to db {_task_name}")
+                fn_log(f"{self._index}:{len(lst_result_items_detail)} items data saved to db {_task_name}")
         def MASIS_item_detail_query_item(self, item)->list:
             # Input item NO
             self._input_send_keys(By.NAME, 'ctl00$ContentPlaceHolder1$txtMano', item)
@@ -624,27 +624,27 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
             # df.to_excel(f'{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\item_detail/{STR_DATESTAMP}_items.xlsx', index=False)
             pass
     def EPIS_contract_batch() -> dict[str, any]:
-        def EPIS_contract_batch_handler(self, source:list[str], index:int = 0) -> None:
+        def EPIS_contract_batch_handler(self, source:list[str], **kwargs) -> None:
             int_total = len(source)
             int_finished_count = 0
             for contract in source:
                 dict_contract_batches = None
                 int_finished_count += 1
                 try:
-                    fn_log(f"{index}:Start fetching {contract} batch.")
+                    fn_log(f"{self._index}:Start fetching {contract} batch.")
                     dict_contract_batches = self._EPIS_contract_batch_query_contract(contract)
                 except TimeoutException:
-                    fn_log(f"{index}:{contract} has no data. {int_finished_count} of {int_total} finished")
+                    fn_log(f"{self._index}:{contract} has no data. {int_finished_count} of {int_total} finished")
                     continue
                 if len(dict_contract_batches['data']['info']) == 0:
-                    fn_log(f"{index}:{contract} has no data. {int_finished_count} of {int_total} finished")
+                    fn_log(f"{self._index}:{contract} has no data. {int_finished_count} of {int_total} finished")
                     continue
                 if  dict_contract_batches['postfix'] == '外幣' and len(dict_contract_batches['data']['info'][0]) != 14:
                     dict_contract_batches['postfix'] = '類型有誤'
                 # Save Contract Batch
                 self._EPIS_contract_batch_save_db(dict_contract_batches)
-                fn_log(f"{index}:{contract} batches info saved!! {int_finished_count} of {int_total} finished")
-            fn_log(f"{index}:contract batches finished!")
+                fn_log(f"{self._index}:{contract} batches info saved!! {int_finished_count} of {int_total} finished")
+            fn_log(f"{self._index}:contract batches finished!")
             return
         def _EPIS_contract_batch_query_contract(self, contract:str):
             BASE_URL = 'https://epis.cht.com.tw/epis100/Pages/GContract/_Menu.aspx?f=G_ContractMenu&cid='
@@ -673,7 +673,7 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     dic_batches_data['temp_batch'] = batch
                     self._EPIS_contract_batch_query_batch(dic_batches_data)
                     int_fetched_batch += 1
-                    fn_log(f"{index}:{contract}({batch}) {int_fetched_batch} / {int_total_batches} batch(es) fetched")
+                    fn_log(f"{self._index}:{contract}({batch}) {int_fetched_batch} / {int_total_batches} batch(es) fetched")
                 return dic_batches_data
             except TimeoutException:
                 raise TimeoutException
@@ -774,10 +774,10 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
                     db.execute_query(f"DELETE FROM {tablename} WHERE 契約編號 = '{contract}'")
                     # Iterate over the list and execute the query for each record
                     db.execute_many(insert_replace_sql , value)
-                    fn_log(f"{index}:contract batches saved to db {tablename}")
+                    fn_log(f"{self._index}:contract batches saved to db {tablename}")
         return vars()
     def sharepoint() -> dict[str, any]:
-        def sharepoint_check_online(self, source:CsMSGReport, index:int = 0) ->bool:
+        def sharepoint_check_online(self, source:CsMSGReport, **kwargs) ->bool:
             self.get(f"{self._sharepoint_base_url}{source.name}/")
             try:
                 self._wait_element(By.XPATH, f"//button[contains(text(), '{source.new_name}')]",2)
@@ -805,8 +805,10 @@ def _create_crawlers_components() -> dict[str, dict[str, Any]]:
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
     return {key: func() for key, func in vars().items()}
-def _create_loader_components() -> dict[str, callable]:
-    def _load_components(self, *args) -> None:
+_crawlers_components = _store_crawlers_components()
+def _store_loader_components() -> dict[str, any]:
+    def _load_components(self, *args, **kwargs) -> None:
+        self._loaded_components = []
         if 'ALL' in args:
             args = list(self._crawlers_components.keys())
         for task in args:
@@ -824,7 +826,7 @@ def _create_loader_components() -> dict[str, callable]:
             self._loaded_components += [task]
             fn_log(f"{task} loaded successfully")
         return None
-    def _remove_components(self, *args) -> None:
+    def _remove_components(self, *args, **kwargs) -> None:
         if 'ALL' in args:
             args = list(self._crawlers_components.keys())
         for task in args:
@@ -840,7 +842,8 @@ def _create_loader_components() -> dict[str, callable]:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
         return None
     return vars()
-def _create_common_crawlers_components() -> dict[str, any]:
+_loader_components = _store_loader_components()
+def _store_common_crawlers_components() -> dict[str, any]:
     def login_cht(self) -> object:
         OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
         self.get(OTP_LOGIN_URL)
@@ -859,16 +862,18 @@ def _create_common_crawlers_components() -> dict[str, any]:
             return 'US\\$'
         except Exception:
             return False
-    def __init__(self, *args, crawlers_components) -> None:
-        self._crawlers_components = crawlers_components
-        self._loaded_components = []
+    def __init__(self, *args, **kwargs) -> None:
+        default = {
+            'index' : 0,
+            'crawlers_components' : _crawlers_components
+        }
+        for key, value in (kwargs|default).items():
+            setattr(self, '_' + key, value)
         self._load_components(*args)
         if 'sharepoint' not in args:self.login_cht()
     return vars()
+_common_crawlers_components = _store_common_crawlers_components()
 
-_loader_components = _create_loader_components()
-_common_crawlers_components = _create_common_crawlers_components()
-_crawlers_components = _create_crawlers_components()
 
 # Procedures
 class CsMyDriver(webdriver.Edge):
@@ -928,11 +933,11 @@ class CsMyDriver(webdriver.Edge):
         super().__init__(service=service, options=options)
         self.int_main_window_handle = self.current_window_handle
 class CsDriverCrawler(CsMyDriver):
-    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), crawlers_components=_crawlers_components):
+    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), **kwargs):
         super().__init__()
         for key, value in basic_components.items():
             if key == '__init__':
-                value(self , *args, crawlers_components=crawlers_components)
+                value(self , *args, **kwargs)
             else:
                 setattr(self, key, MethodType(value, self) if callable(value) else value)
         return
@@ -987,7 +992,7 @@ class CsMultiCrawlersManager(CsMyClass):
                 self._call_instances(handler='_load_components')(task)
                 # set handler entrance for multi_manager
                 for key in self._crawlers_components[task].keys():
-                    if 'handler' in key:
+                    if '_' not in key:
                         setattr(self, key, self._call_instances(handler=key, threads=threads))
             else:
                 raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
@@ -1047,7 +1052,7 @@ class CsMultiCrawlersManager(CsMyClass):
         def _init_instance(*args, index, **kwargs):
             if index in self._instances:
                 return
-            self._instances.update({index:self._subclass(*args, **kwargs)})
+            self._instances.update({index:self._subclass(*args, index=index, **kwargs)})
         multithreading(
             source = None,
             call_def = _init_instance,

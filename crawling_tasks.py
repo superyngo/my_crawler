@@ -7,7 +7,7 @@ multi_driver_crawler = None
 # test
 lst_source_contracts = ["23S13A0041","23R13A0051"]
 lst_items = ["02502735","21190613"]
-lst_source_MSG_reports = [{'name' : 'RS4183MA4L'}] # {'name' : 'RS5203A' , 'prefix' : '20240110'} 
+# lst_source_MSG_reports = [{'name' : 'RS4212RA4L','postfix' : '50502'}] # {'name' : 'RS5203A' , 'prefix' : '20240110'} 
 
 configs = {
   'EPIS_contract_batch' : {
@@ -40,15 +40,15 @@ configs = {
     'task' : 'MASIS_InvQry',
     'threads' : 1
 }}
-multi_driver_crawler = multi_driver_crawler or CsMultiCrawlersManager('sharepoint')
+multi_driver_crawler = multi_driver_crawler or CsMultiCrawlersManager()
 
 if __name__ == "__main__":
     multi_driver_crawler.crawling_main(**configs['MSG'])
-    multi_driver_crawler._remove_instances_components('MASIS_InvQry')
-    multi_driver_crawler.crawling_main(**(configs['MASIS_InvQry'] | {'threads':2,'source' : ['50502', '50503']}))
-    multi_driver_crawler._remove_instances_components('MASIS_InvQry')
-    multi_driver_crawler.crawling_main(**(configs['MASIS_InvQry'] | {'source' : ['50502', '50503']}))
-    multi_driver_crawler.crawling_main(**configs['EPIS_contract_batch'])
-    multi_driver_crawler.crawling_main(**configs['EPIS_contract_info_items'])
-    multi_driver_crawler.crawling_main(**configs['MASIS_barcode'])
-    multi_driver_crawler.crawling_main(**configs['MASIS_item_detail'])
+    # multi_driver_crawler._remove_instances_components('MASIS_InvQry')
+    # multi_driver_crawler.crawling_main(**(configs['MASIS_InvQry'] | {'threads':2,'source' : ['50502', '50503']}))
+    # multi_driver_crawler._remove_instances_components('MASIS_InvQry')
+    # multi_driver_crawler.crawling_main(**(configs['MASIS_InvQry'] | {'source' : ['50502', '50503']}))
+    # multi_driver_crawler.crawling_main(**configs['EPIS_contract_batch'])
+    # multi_driver_crawler.crawling_main(**configs['EPIS_contract_info_items'])
+    # multi_driver_crawler.crawling_main(**configs['MASIS_barcode'])
+    # multi_driver_crawler.crawling_main(**configs['MASIS_item_detail'])
