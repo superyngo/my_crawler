@@ -11,7 +11,235 @@ from modules.bin import *
 from typing import TypedDict, Any
 from types import MethodType
 
-def _store_crawlers_components() -> dict[str, dict[str, Any]]:
+class test():
+    def __init__(self, *args, **kwargs):
+        if args:self.args=list(args)
+        if kwargs:self.kwargs=kwargs
+    def bark(self, *args, source, **kwargs):
+        print(source)
+        print(list(args))
+        print(kwargs)
+    def woof(self, *args, **kwargs):
+        print(list(args))
+        print(kwargs)
+
+class CsMyClass:
+    def __init__(self, **kwargs) -> None:
+        dic_default_values = {} # if default needed
+        for key, value in kwargs.items():
+            if key in self.__slots__:
+                setattr(self, key, dic_default_values.get(key, value))
+            else:
+                raise AttributeError(f"'{key}' is not a valid attribute for {self.__class__.__name__}")
+    def __getattr__(self, name):
+        if name in self.__slots__:
+            raise AttributeError(f"'{name}' was not set during initialization")
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+
+class CsMSGReport(CsMyClass):
+    class CsSlotTypes(TypedDict):
+        name: str
+        prefix: str
+        postfix: str
+        set_report: dict[str, str]
+        set_report_attribute: dict[str, str]
+        handle_check_online: bool
+        filename: str
+        filename_extension: str
+        show_report: bool
+        old_path: str
+        new_name: str
+        new_path: str
+    __slots__ = list(CsSlotTypes.__annotations__.keys())
+    def __init__(self, name:str, prefix:str = None, postfix:str = None, set_report:dict = {}, set_report_attribute:dict = {}, handle_check_online:bool = True, show_report:bool = True) -> None:
+        self.filename = self.name = name
+        self.filename_extension = 'xlsx'
+        self.postfix = postfix
+        self.handle_check_online = handle_check_online
+        self.show_report = show_report
+        match name:
+            case 'RS4183MA4L':
+                self.prefix = prefix if prefix else STR_THIS_MONTH_PREFIX
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISIV',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        'ddlOrg':['fn_driver_select_change_value', By.ID, '5']
+                    }
+            # RS0101RA4L_NE 累積收料
+            case "RS0101RA4L_NE":
+                self.prefix = prefix if prefix else STR_DATESTAMP
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISMSH',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        "ddlOrg":['fn_driver_select_change_value', By.ID, 'M33'],
+                        "txtSDate":['fn_driver_input_send_keys', By.ID, STR_START_DATE]
+                    }
+            # RS4212RA4L by 庫 累積領退
+            case 'RS4212RA4L':
+                self.prefix = prefix if prefix else STR_DATESTAMP
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISIV',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        # 'ddlRpt':['fn_driver_select_change_value', By.ID, '0'],
+                        'txtWhNo':['fn_driver_input_send_keys', By.ID, postfix]
+                    }
+            # RS4153RA4L 即時庫存
+            case 'RS4153RA4L':
+                self.prefix = prefix if prefix else STR_DATESTAMP
+                self.postfix = postfix if postfix else "all"
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISIV',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        'ddlWhNo1':['fn_driver_select_change_value', By.ID, '50502'],
+                        'ddlWhNo2':['fn_driver_select_change_value', By.ID, '50503'],
+                        'ddlWhNo3':['fn_driver_select_change_value', By.ID, '59521'],
+                        'ddlWhNo4':['fn_driver_select_change_value', By.ID, '59531'],
+                    }
+            # RS4182M 當月庫存料月數
+            case 'RS4182M':
+                self.prefix = prefix if prefix else STR_THIS_MONTH_PREFIX
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISIV',
+                        }
+                self.set_report_attribute = set_report_attribute 
+            # RS0472MA4L 當月料庫作業量
+            case 'RS0472MA4L':
+                self.prefix = prefix if prefix else STR_THIS_MONTH_PREFIX
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISMSH',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        "ddlSOrg":['fn_driver_select_change_value', By.ID, '5']
+                    }
+            # RS1563MA4L 當月久未領用
+            case 'RS1563MA4L':
+                self.prefix = prefix if prefix else STR_THIS_MONTH_PREFIX
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISIC',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        'ddlShowDetail':['fn_driver_select_change_value', By.ID, '']
+                    }
+            case 'RSahdinqRA4L':
+                self.prefix = prefix if prefix else STR_THIS_MONTH_PREFIX
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISLP',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        'txtCtId':['fn_driver_input_send_keys', By.ID, prefix]
+                    }
+            case 'RS5203A':
+                self.prefix = prefix if prefix else STR_DATESTAMP
+                self.postfix = postfix if postfix else "all"
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISASIS',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        'txtMaxPrice':['fn_driver_input_send_keys', By.ID, '9999999'],
+                        'txtEDate':['fn_driver_input_send_keys', By.ID, datetime.datetime.strptime(self.prefix, '%Y%m%d').strftime('%Y/%m/%d')],
+                        'ddlSOrg':['fn_driver_select_change_value', By.ID, ''],
+                        'chkSelect':['fn_driver_click', By.ID],
+                    }
+                self.filename += STR_DATESTAMP
+                self.filename_extension = 'xls'
+                self.show_report = False
+            case 'RS4107RA4L':
+                self.prefix = prefix if prefix else STR_FIRST_DAY_OF_THIS_YEAR + "_" + STR_DATESTAMP
+                self.postfix = postfix if postfix else "行通"
+                self.set_report = set_report if set_report else {
+                            'ddlSys':'MASIS',
+                            'ddlCSys':'MASISIV',
+                        }
+                self.set_report_attribute = set_report_attribute if set_report_attribute else {
+                        'ddlOrg':['fn_driver_select_change_value', By.ID, 'M33'],
+                        'txtSDate':['fn_driver_input_send_keys', By.ID, datetime.date(DAT_TODAY.year, 1, 1).strftime("%Y/%m/%d")],
+                    }
+            case "_":
+                self.prefix = prefix if prefix else STR_DATESTAMP
+                self.set_report = set_report
+                self.set_report_attribute = set_report_attribute
+        self.old_path = f"{STR_DOWNLOADS_FOLDER_PATH}\\{self.filename}.{self.filename_extension}"
+        self.new_name = f"{self.prefix}_{self.filename}_{self.postfix}.{self.filename_extension}" if bool(self.postfix) else f"{self.prefix}_{self.filename}.{self.filename_extension}"
+        self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
+
+
+def spit_cs_basic_components() -> dict[str, any]:
+    def __getattr__(self, name):
+        raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
+    return vars()
+
+def spit_cs_my_drive_components():
+    def _select_change_value(self, By_locator:str, locator:str, new_value:str) -> None:
+        _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
+        _select_element = Select(_select_element)  # Create a Select instance
+        _select_element.select_by_value(new_value)
+    def _input_send_keys(self, By_locator:str, locator:str, new_value:str) -> None:
+        _input_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
+        _input_element.clear()
+        _input_element.send_keys(new_value)
+    def _wait_element(self, By_locator:str, locator:str, time:int = 1000):
+        try:
+            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
+        except UnexpectedAlertPresentException:
+            try:
+                self.switch_to.alert.accept()
+            except NoAlertPresentException:
+                pass
+            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
+    def _try_extract_element_value(self, By_locator:str, locator:str, error_return = "") -> str:
+        try:
+            element = self.find_element(By_locator, locator)
+            match element.tag_name:
+                case 'th':
+                    return element.find_element(By.XPATH, 'following-sibling::*[1]').text
+                case 'input' | 'textarea':
+                    if element.get_attribute('type') == 'checkbox':
+                        return element.get_attribute('checked')
+                    return element.get_attribute('value')
+                case 'select':
+                    return Select(element).first_selected_option.text
+                case _:
+                    return element.text
+        except NoSuchElementException:
+            return error_return
+    def _my_drive_to__init__(self, *args):
+        import logging
+        # Suppress selenium and webdriver_manager logs
+        logging.getLogger('selenium').setLevel(logging.WARNING)
+        logging.getLogger('urllib3').setLevel(logging.WARNING)
+        logging.getLogger('webdriver_manager').setLevel(logging.WARNING)
+        edge_bin = './bin/msedgedriver.exe'
+        port = 4444
+        service_args=[
+                    #   '--log-level=ALL',
+                    #   '--append-log',
+                    #   '--readable-timestamp',
+                    '--disable-build-check',
+                    ]
+        service = Service(executable_path=edge_bin, service_args=service_args)
+        options = Options()
+        options.add_argument('--disable-notifications')
+        options.add_argument('--inprivate')
+        options.add_argument("--disable-notifications")
+        options.add_argument("--log-level=3")
+        super(type(self),self).__init__(service=service, options=options)
+        self.int_main_window_handle = self.current_window_handle
+    return vars()
+
+def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
     def MSG() -> dict[str, any]:
         def MSG_handler(self, source:list[str], handle_check_online:bool=True, **kwargs) -> None:
             _BASE_URL = 'https://msgrpt.cht.com.tw/RsView12/RsPortal.aspx'
@@ -97,7 +325,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 except Exception as e:
                     return f"failed with {e}"
         return vars()
-        def __init__(self) -> None:
+        def _task__init__(self) -> None:
             print('MSG component equipped!!')
     def MASIS_InvQry() -> dict[str, any]:
         def MASIS_InvQry_handler(self, source:list[str], **kwargs) -> None:
@@ -620,6 +848,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     fn_log(f"{self._index}:contract batches saved to db {tablename}")
         return vars()
     def sharepoint() -> dict[str, any]:
+        _sharepoint_base_url = 'https://cht365.sharepoint.com/sites/msteams_e919c5/Shared Documents/General/存控/0_DB/'
         def sharepoint_check_online(self, source:CsMSGReport, **kwargs) ->bool:
             self.get(f"{self._sharepoint_base_url}{source.name}/")
             try:
@@ -642,58 +871,77 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 return "succeeded"
             except Exception as e:
                 return f"failed with {e}"
-        _sharepoint_base_url = 'https://cht365.sharepoint.com/sites/msteams_e919c5/Shared Documents/General/存控/0_DB/'
-        def __init__(self) -> None:
+        def _task__init__(self) -> None:
             self.get(self._sharepoint_base_url)
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
+    def _loader_init_remove() -> dict[str, any]:
+        def _loader__init__(self, task) -> None:
+            if task != 'sharepoint':self.login_cht()
+        def _loader__remove__(self, task) -> None:
+            pass
+        return vars()
     return {key: func() for key, func in vars().items()}
-_crawlers_components = _store_crawlers_components()
-def _store_loader_components() -> dict[str, any]:
-    def _load_components(self, *args, **kwargs) -> None:
-        self._loaded_components = []
+
+def spit_cs_loader_components(_source_loadable_components:dict[str, dict[str, Any]]) -> dict[str, any]:
+    def load_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._crawlers_components.keys())
+            args = list(self._source_loadable_components.keys())
+            args.remove('_loader_init_remove')
         for task in args:
             if task in self._loaded_components:
                 fn_log(f"{task} has already been loaded so skip")
                 continue
-            if task in list(self._crawlers_components.keys()) + ['ALL']:
-                for key, value in self._crawlers_components[task].items():
-                    if key == '__init__':
-                        value(self)
-                    else:
-                        setattr(self, key, MethodType(value, self) if callable(value) else value)
+            if task in list(self._source_loadable_components.keys()) + ['ALL']:
+                for key, value in self._source_loadable_components[task].items():
+                    match key:
+                        case '_task__init__':
+                            MethodType(value, self)()
+                        case '_task__remove__':
+                            pass
+                        case _:
+                            setattr(self, key, MethodType(value, self) if callable(value) else value)
             else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
-            self._loaded_components += [task]
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._source_loadable_components.keys())} or 'ALL' ")
+            MethodType(self._source_loadable_components['_loader_init_remove']['_loader__init__'], self)(task)
+            self._loaded_components.append(task)
             fn_log(f"{task} loaded successfully")
         return None
-    def _remove_components(self, *args, **kwargs) -> None:
+    def remove_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._crawlers_components.keys())
+            args = list(self._source_loadable_components.keys())
+            args.remove('_loader_init_remove')
         for task in args:
             if task in self._loaded_components:
-                for key in self._crawlers_components[task].keys():
-                    if key == '__init__':
-                        continue
-                    if hasattr(self, key):
-                        delattr(self, key)
+                for key,value in self._source_loadable_components[task].items():
+                    match key:
+                        case '_task__init__':
+                            pass
+                        case '_task__remove__':
+                            MethodType(value, self)()
+                        case _:
+                            if hasattr(self, key):delattr(self, key)
+                MethodType(self._source_loadable_components['_loader_init_remove']['_loader__remove__'], self)(task)
                 self._loaded_components.remove(task)
                 fn_log(f"{task} removed successfully")
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
         return None
+    def _loader_to__init__(self, *args):
+        self._loaded_components = []
+        if args:self.load_components(*args)
     return vars()
-_loader_components = _store_loader_components()
-def _store_common_crawlers_components() -> dict[str, any]:
+
+def spit_cs_cht_components() -> dict[str, any]:
     def login_cht(self) -> object:
-        OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
-        self.get(OTP_LOGIN_URL)
-        self._wait_element(By.ID, 'orientation')
-        self.switch_to.window(self.window_handles[-1])
-        self.close()
-        self.switch_to.window(self.window_handles[0])
+        if not self._login_cht:
+            OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
+            self.get(OTP_LOGIN_URL)
+            self._wait_element(By.ID, 'orientation')
+            self.switch_to.window(self.window_handles[-1])
+            self.close()
+            self.switch_to.window(self.window_handles[0])
+            self._login_cht = True
         return self
     def _try_currency(self):
         try:
@@ -705,113 +953,42 @@ def _store_common_crawlers_components() -> dict[str, any]:
             return 'US\\$'
         except Exception:
             return False
+    def _cht_to__init__(self, *args):
+        self._login_cht = False
+    return vars()
+
+def spit_cs_init_components(_source_instance_components:dict[str, any]={}) -> dict[str, any]:
     def __init__(self, *args, **kwargs) -> None:
         default = {
-            'index' : 0,
-            'crawlers_components' : _crawlers_components
+            '_index' : 0,
         }
-        for key, value in (kwargs|default).items():
-            setattr(self, '_' + key, value)
-        self._load_components(*args)
-        if 'sharepoint' not in args:self.login_cht()
-    return vars()
-_common_crawlers_components = _store_common_crawlers_components()
-
-
-# Procedures
-class CsMyDriver(webdriver.Edge):
-    def _select_change_value(self, By_locator:str, locator:str, new_value:str) -> None:
-        _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
-        _select_element = Select(_select_element)  # Create a Select instance
-        _select_element.select_by_value(new_value)
-    def _input_send_keys(self, By_locator:str, locator:str, new_value:str) -> None:
-        _input_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
-        _input_element.clear()
-        _input_element.send_keys(new_value)
-    def _wait_element(self, By_locator:str, locator:str, time:int = 1000):
-        try:
-            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
-        except UnexpectedAlertPresentException:
-            try:
-                self.switch_to.alert.accept()
-            except NoAlertPresentException:
-                pass
-            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
-    def _try_extract_element_value(self, By_locator:str, locator:str, error_return = "") -> str:
-        try:
-            element = self.find_element(By_locator, locator)
-            match element.tag_name:
-                case 'th':
-                    return element.find_element(By.XPATH, 'following-sibling::*[1]').text
-                case 'input' | 'textarea':
-                    if element.get_attribute('type') == 'checkbox':
-                        return element.get_attribute('checked')
-                    return element.get_attribute('value')
-                case 'select':
-                    return Select(element).first_selected_option.text
-                case _:
-                    return element.text
-        except NoSuchElementException:
-            return error_return
-    def __init__(self):
-        import logging
-        # Suppress selenium and webdriver_manager logs
-        logging.getLogger('selenium').setLevel(logging.WARNING)
-        logging.getLogger('urllib3').setLevel(logging.WARNING)
-        logging.getLogger('webdriver_manager').setLevel(logging.WARNING)
-        edge_bin = './bin/msedgedriver.exe'
-        port = 4444
-        service_args=[
-                    #   '--log-level=ALL',
-                    #   '--append-log',
-                    #   '--readable-timestamp',
-                    '--disable-build-check',
-                    ]
-        service = Service(executable_path=edge_bin, service_args=service_args)
-        options = Options()
-        options.add_argument('--disable-notifications')
-        options.add_argument('--inprivate')
-        options.add_argument("--disable-notifications")
-        options.add_argument("--log-level=3")
-        super().__init__(service=service, options=options)
-        self.int_main_window_handle = self.current_window_handle
-class CsDriverCrawler(CsMyDriver):
-    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), **kwargs):
-        super().__init__()
-        for key, value in basic_components.items():
-            if key == '__init__':
-                value(self , *args, **kwargs)
-            else:
-                setattr(self, key, MethodType(value, self) if callable(value) else value)
-        return
-    def __getattr__(self, name):
-        raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
-
-
-super_args={
-    'args':[],
-    'kwargs':{}
-}
-class CsSuperArgs(dict):
-    def __init__(self, *args, **kwargs):
-        self.args=args
-        self.kwargs=kwargs
-def composer_factory(*args, cs=None, super_args=CsSuperArgs(), **kwargs):
-    match cs:
-        case None:
-            class _():
-                pass
-        case _:
-            class _(cs):
-                pass
-    def __init__(self, *args, **kwargs):
-        super().__init__(*super_args.args, **super_args.kwargs)
-        default = {}
-        for key, value in (kwargs|default).items():
+        for key, value in (default|_source_instance_components|kwargs).items():
             if key == '__init__':
                 value(self , *args)
-            else:
-                setattr(self, key, MethodType(value, self) if callable(value) else value)
-        return
-    _.__init__ = __init__
-    return _(*args, **kwargs)
+            else:setattr(self, key, MethodType(value, self) if callable(value) else value)
+        for _init in self._to__init__:
+            MethodType(_init, self)(*args)
+    return vars()
+
+
+# class components
+def cs_factory(cs=None, **init_class_kwargs):
+    # create class skelton
+    match cs:
+        case None:
+            class _cs():
+                pass
+        case _:
+            class _cs(cs):
+                pass
+    _cs._to__init__ = []
+    for key, value in init_class_kwargs.items():
+        if '_to__init__' in key:
+            _cs._to__init__.append(value)
+        else:setattr(_cs, key, value)
+    return _cs
+
+
+
+
+
