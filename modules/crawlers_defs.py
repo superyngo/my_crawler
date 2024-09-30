@@ -24,6 +24,7 @@ class CsMyClass:
         if name in self.__slots__:
             raise AttributeError(f"'{name}' was not set during initialization")
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+
 class CsMSGReport(CsMyClass):
     class CsSlotTypes(TypedDict):
         name: str
@@ -162,6 +163,7 @@ class CsMSGReport(CsMyClass):
         self.old_path = f"{STR_DOWNLOADS_FOLDER_PATH}\\{self.filename}.{self.filename_extension}"
         self.new_name = f"{self.prefix}_{self.filename}_{self.postfix}.{self.filename_extension}" if bool(self.postfix) else f"{self.prefix}_{self.filename}.{self.filename_extension}"
         self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
+
 class CsSplittedDrivers(CsMyClass):
     class CsSlotTypes(TypedDict):
         driver:object
@@ -932,6 +934,7 @@ class CsMyDriver(webdriver.Edge):
         options.add_argument("--log-level=3")
         super().__init__(service=service, options=options)
         self.int_main_window_handle = self.current_window_handle
+
 class CsDriverCrawler(CsMyDriver):
     def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), **kwargs):
         super().__init__()
