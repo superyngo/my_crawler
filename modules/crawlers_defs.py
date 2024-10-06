@@ -994,9 +994,9 @@ class CsMultiCrawlersManager(CsMyClass):
                 # load component for instances
                 self._call_instances(handler='_load_components')(task)
                 # set handler entrance for multi_manager
-                for key in self._crawlers_components[task].keys():
-                    if '_' not in key:
-                        setattr(self, key, self._call_instances(handler=key, threads=threads))
+                for handler in self._crawlers_components[task].keys():
+                    if not task.startswith("_"):
+                        setattr(self, handler, self._call_instances(handler=handler, threads=threads))
             else:
                 raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
             self._loaded_instances_components += [task]

@@ -5,8 +5,8 @@ from data.source_items import lst_items
 from data.source_MSG_Reports import lst_source_MSG_reports
 multi_driver_crawler = None
 # test
-lst_source_contracts = ["23S13A0041","23R13A0051"]
-lst_items = ["02502735","21190613"]
+# lst_source_contracts = ["23S13A0041","23R13A0051"]
+# lst_items = ["02502735","21190613"]
 # lst_source_MSG_reports = [{'name' : 'RS4212RA4L','postfix' : '50502'}] # {'name' : 'RS5203A' , 'prefix' : '20240110'} 
 
 configs = {
