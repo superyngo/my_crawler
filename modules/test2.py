@@ -932,7 +932,7 @@ def spit_cs_loader_components(_source_loadable_components:dict[str, dict[str, An
         if args:self.load_components(*args)
     return vars()
 
-def spit_cs_cht_components() -> dict[str, any]:
+class _cs_cht_components():
     def login_cht(self) -> object:
         if not self._login_cht:
             OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
@@ -964,9 +964,8 @@ def spit_cs_cht_components() -> dict[str, any]:
         #     setattr(self, f"_{attr_name}", value)
 
         # setattr(cls, attr_name, property(getter, setter))
-    return vars()
 
-def spit_cs_init_components(_source_instance_components:dict[str, any]={}) -> dict[str, any]:
+class set_attribute():
     def __init__(self, *args, **kwargs) -> None:
         default = {
             '_index' : 0,
@@ -981,58 +980,13 @@ def spit_cs_init_components(_source_instance_components:dict[str, any]={}) -> di
 
 
 # class components
-def cs_factory(cs=None, **init_class_kwargs):
+def cs_factory(*lst_cs):
     # create class skelton
-    match cs:
-        case None:
-            class _cs():
-                pass
-        case _:
-            class _cs(cs):
-                pass
-    _cs._to__init__ = []
-    for key, value in init_class_kwargs.items():
-        if '_to__init__' in key:
-            _cs._to__init__.append(value)
-        else:setattr(_cs, key, value)
+    class _cs(*lst_cs):
+        pass
+    def _init(self, *args, **kwargs):
+      for cs in lst_cs:
+        cs.__init__(self, *args, **kwargs)
+    setattr(_cs, "__init__", _init)
     return _cs
 
-
-class test:
-    def __init__(self, *args, **kwargs):
-        print("Initializing test")
-        print(self.__class__)
-        print(super())
-        # super().__init__(*args, **kwargs)
-    _abc = 123
-    @property
-    def abc(self):
-        return self._abc
-    @abc.setter
-    def abc(self, new_value):
-        self._abc = new_value
-
-class ClassA:
-    def __init__(self, *args, **kwargs):
-        print("Initializing ClassA")
-        print(self.__class__)
-        print(super())
-        # super().__init__(*args, **kwargs)
-        self.a = 10
-
-class ClassB:
-    def __init__(self, *args, **kwargs):
-        print("Initializing ClassB")
-        print(super())
-        # super().__init__(*args, **kwargs)
-        self.b = 20
-
-class ChildClass(test, ClassA, ClassB):
-    def __init__(self, *args, **kwargs):
-        print("Initializing ChildClass")
-        print(self.__class__)
-        print(super())
-        super().__init__(*args, **kwargs)
-
-
-child = ChildClass()
