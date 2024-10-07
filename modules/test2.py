@@ -176,12 +176,11 @@ class CsMSGReport(CsMyClass):
         self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
 
 
-def spit_cs_basic_components() -> dict[str, any]:
+class _cs_basic_components:
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
-    return vars()
 
-def spit_cs_my_drive_components():
+class _cs_my_drive_components:
     def _select_change_value(self, By_locator:str, locator:str, new_value:str) -> None:
         _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
         _select_element = Select(_select_element)  # Create a Select instance
@@ -215,7 +214,7 @@ def spit_cs_my_drive_components():
                     return element.text
         except NoSuchElementException:
             return error_return
-    def _my_drive_to__init__(self, *args):
+    def __init__(self, *args, **kwargs):
         import logging
         # Suppress selenium and webdriver_manager logs
         logging.getLogger('selenium').setLevel(logging.WARNING)
@@ -237,7 +236,6 @@ def spit_cs_my_drive_components():
         options.add_argument("--log-level=3")
         super(type(self),self).__init__(service=service, options=options)
         self.int_main_window_handle = self.current_window_handle
-    return vars()
 
 def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
     def MSG() -> dict[str, any]:
@@ -883,17 +881,17 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
         return vars()
     return {key: func() for key, func in vars().items()}
 
-def spit_cs_loader_components(_source_loadable_components:dict[str, dict[str, Any]]) -> dict[str, any]:
+class _cs_loader_components():
     def load_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._source_loadable_components.keys())
+            args = list(self._loadable_components.keys())
             args.remove('_loader_init_remove')
         for task in args:
             if task in self._loaded_components:
                 fn_log(f"{task} has already been loaded so skip")
                 continue
-            if task in list(self._source_loadable_components.keys()) + ['ALL']:
-                for key, value in self._source_loadable_components[task].items():
+            if task in list(self._loadable_components.keys()) + ['ALL']:
+                for key, value in self._loadable_components[task].items():
                     match key:
                         case '_task__init__':
                             MethodType(value, self)()
@@ -902,18 +900,18 @@ def spit_cs_loader_components(_source_loadable_components:dict[str, dict[str, An
                         case _:
                             setattr(self, key, MethodType(value, self) if callable(value) else value)
             else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._source_loadable_components.keys())} or 'ALL' ")
-            MethodType(self._source_loadable_components['_loader_init_remove']['_loader__init__'], self)(task)
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._loadable_components.keys())} or 'ALL' ")
+            MethodType(self._loadable_components['_loader_init_remove']['_loader__init__'], self)(task)
             self._loaded_components.append(task)
             fn_log(f"{task} loaded successfully")
         return None
     def remove_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._source_loadable_components.keys())
+            args = list(self._loadable_components.keys())
             args.remove('_loader_init_remove')
         for task in args:
             if task in self._loaded_components:
-                for key,value in self._source_loadable_components[task].items():
+                for key,value in self._loadable_components[task].items():
                     match key:
                         case '_task__init__':
                             pass
@@ -921,16 +919,16 @@ def spit_cs_loader_components(_source_loadable_components:dict[str, dict[str, An
                             MethodType(value, self)()
                         case _:
                             if hasattr(self, key):delattr(self, key)
-                MethodType(self._source_loadable_components['_loader_init_remove']['_loader__remove__'], self)(task)
+                MethodType(self._loadable_components['_loader_init_remove']['_loader__remove__'], self)(task)
                 self._loaded_components.remove(task)
                 fn_log(f"{task} removed successfully")
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
         return None
-    def _loader_to__init__(self, *args):
+    def __init__(self, *args, loadable_components:dict, **kwargs):
+        self._loadable_components = loadable_components
         self._loaded_components = []
         if args:self.load_components(*args)
-    return vars()
 
 class _cs_cht_components():
     def login_cht(self) -> object:
@@ -953,30 +951,16 @@ class _cs_cht_components():
             return 'US\\$'
         except Exception:
             return False
-    def _cht_to__init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._login_cht = False
-        # Define the getter
-        # def getter(self):
-        #     return getattr(self, f"_{attr_name}")
-
-        # # Define the setter
-        # def setter(self, value):
-        #     setattr(self, f"_{attr_name}", value)
-
-        # setattr(cls, attr_name, property(getter, setter))
 
 class set_attribute():
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, attribute:dict, **kwargs) -> None:
         default = {
             '_index' : 0,
         }
-        for key, value in (default|_source_instance_components|kwargs).items():
-            if key == '__init__':
-                value(self , *args)
-            else:setattr(self, key, MethodType(value, self) if callable(value) else value)
-        for _init in self._to__init__:
-            MethodType(_init, self)(*args)
-    return vars()
+        for key, value in (default|attribute).items():
+            setattr(self, key, MethodType(value, self) if callable(value) else value)
 
 
 # class components
