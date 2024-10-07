@@ -869,7 +869,7 @@ def _store_common_crawlers_components() -> dict[str, any]:
             'index' : 0,
             'crawlers_components' : _crawlers_components
         }
-        for key, value in (kwargs|default).items():
+        for key, value in (default|kwargs).items():
             setattr(self, '_' + key, value)
         self._load_components(*args)
         if 'sharepoint' not in args:self.login_cht()
@@ -946,28 +946,6 @@ class CsDriverCrawler(CsMyDriver):
         return
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
-
-class Composer:
-    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), crawlers_components=_crawlers_components):
-        super().__init__()
-        for key, value in basic_components.items():
-            if key == '__init__':
-                value(self , *args, crawlers_components=crawlers_components)
-            else:
-                setattr(self, key, MethodType(value, self) if callable(value) else value)
-        return
-class test():
-    def __init__(self, *args, **kwargs):
-        if args:self.args=list(args)
-        if kwargs:self.kwargs=kwargs
-    def bark(self, *args, source, **kwargs):
-        print(source)
-        print(list(args))
-        print(kwargs)
-    def woof(self, *args, **kwargs):
-        print(list(args))
-        print(kwargs)
-
 
 class CsMultiCrawlersManager(CsMyClass):
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}

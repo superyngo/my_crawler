@@ -6,11 +6,6 @@ lst_source_MSG_reports:list = [
     {'name' : 'RS4183MA4L'},
     # RS0101RA4L_NE 累積收料
     {'name' : 'RS0101RA4L_NE'},
-    # RS4212RA4L 50502 累積領退
-    {
-    'name' : 'RS4212RA4L', 
-    'postfix' : '50502'
-    },
     # RS4212RA4L 50503 累積領退
     {
     'name' : 'RS4212RA4L', 
@@ -40,10 +35,10 @@ lst_source_MSG_reports:list = [
     {
         'name' : 'RS4153RA4L',
         'set_report_attribute' : {
-                        'ddlWhNo1':['fn_driver_select_change_value', By.ID, '50502'],
-                        'ddlWhNo2':['fn_driver_select_change_value', By.ID, '50503'],
-                        'ddlWhNo3':['fn_driver_select_change_value', By.ID, '59511'],
-                        'ddlWhNo4':['fn_driver_select_change_value', By.ID, '59512'],
+                        'ddlWhNo1':['fn_driver_select_change_value', By.ID, '50503'],
+                        'ddlWhNo2':['fn_driver_select_change_value', By.ID, '59511'],
+                        'ddlWhNo3':['fn_driver_select_change_value', By.ID, '59512'],
+                        'ddlWhNo4':['fn_driver_select_change_value', By.ID, ''],
                     },
         'postfix' : '行北'
     },
