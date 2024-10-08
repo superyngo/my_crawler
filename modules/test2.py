@@ -881,7 +881,7 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
         return vars()
     return {key: func() for key, func in vars().items()}
 
-class _cs_loader_components():
+class _cs_loader_components:
     def load_components(self, *args) -> None:
         if 'ALL' in args:
             args = list(self._loadable_components.keys())
@@ -930,7 +930,7 @@ class _cs_loader_components():
         self._loaded_components = []
         if args:self.load_components(*args)
 
-class _cs_cht_components():
+class _cs_cht_components:
     def login_cht(self) -> object:
         if not self._login_cht:
             OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
@@ -951,26 +951,32 @@ class _cs_cht_components():
             return 'US\\$'
         except Exception:
             return False
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         self._login_cht = False
+class CsMultiplify:
+    def __init__(self, index = 0):
+        if index is None:index = 0 
+        self._index = index
 
-class set_attribute():
-    def __init__(self, *args, attribute:dict, **kwargs) -> None:
-        default = {
-            '_index' : 0,
-        }
-        for key, value in (default|attribute).items():
-            setattr(self, key, MethodType(value, self) if callable(value) else value)
-
+dic_cs={
+    _cs_basic_components:[],
+    _cs_my_drive_components:[],
+    _cs_loader_components:['args', 'loadable_components'],
+    _cs_cht_components:[],
+    CsMultiplify:['index']
+}
 
 # class components
-def cs_factory(*lst_cs):
+def cs_factory(dic_cs):
     # create class skelton
-    class _cs(*lst_cs):
+    class _Cs(*dic_cs):
         pass
     def _init(self, *args, **kwargs):
-      for cs in lst_cs:
-        cs.__init__(self, *args, **kwargs)
-    setattr(_cs, "__init__", _init)
-    return _cs
+        # set attributes
+        for Cs, lst_arguments in dic_cs.items():
+            _args = args if 'args' in lst_arguments and lst_arguments.remove('args') is None else []
+            _kwargs = {key: kwargs.get(key) for key in lst_arguments}
+            Cs.__init__(self, *_args, **_kwargs)
+    setattr(_Cs, "__init__", _init)
+    return _Cs
 

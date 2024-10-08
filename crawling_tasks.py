@@ -14,14 +14,13 @@ multi_driver_crawler = CsMultiCrawlersManager()
 
 task = None
 while task != "stop":
+  if task:multi_driver_crawler.crawling_main(**configs[task])
   importlib.reload(data.source_contracts)
   importlib.reload(data.source_items)
   importlib.reload(data.source_MSG_Reports)
   from data.source_contracts import lst_source_contracts
   from data.source_items import lst_items
   from data.source_MSG_Reports import lst_source_MSG_reports
-
-
   configs = {
     'EPIS_contract_batch' : {
       'source' : lst_source_contracts,
@@ -53,9 +52,8 @@ while task != "stop":
       'task' : 'MASIS_InvQry',
       'threads' : 1
   }}
-
   task = input(f"tasks:\n {"\n ".join(configs.keys())}\nor stop:")
-  multi_driver_crawler.crawling_main(**configs[task])
+
 
 multi_driver_crawler._call_instances('close')()
 fn_log("All jobs done!!")
