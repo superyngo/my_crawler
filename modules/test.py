@@ -1011,28 +1011,3 @@ class test:
     @abc.setter
     def abc(self, new_value):
         self._abc = new_value
-
-class ClassA:
-    def __init__(self, *args, **kwargs):
-        print("Initializing ClassA")
-        print(self.__class__)
-        print(super())
-        # super().__init__(*args, **kwargs)
-        self.a = 10
-
-class ClassB:
-    def __init__(self, *args, **kwargs):
-        print("Initializing ClassB")
-        print(super())
-        # super().__init__(*args, **kwargs)
-        self.b = 20
-
-class ChildClass(test, ClassA, ClassB):
-    def __init__(self, *args, **kwargs):
-        print("Initializing ChildClass")
-        print(self.__class__)
-        print(super())
-        super().__init__(*args, **kwargs)
-
-
-child = ChildClass()

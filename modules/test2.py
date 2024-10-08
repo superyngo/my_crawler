@@ -176,11 +176,11 @@ class CsMSGReport(CsMyClass):
         self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
 
 
-class _cs_basic_components:
+class CsBasicComponent:
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
 
-class _cs_my_drive_components:
+class CsMyDriveComponent:
     def _select_change_value(self, By_locator:str, locator:str, new_value:str) -> None:
         _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
         _select_element = Select(_select_element)  # Create a Select instance
@@ -214,7 +214,7 @@ class _cs_my_drive_components:
                     return element.text
         except NoSuchElementException:
             return error_return
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         import logging
         # Suppress selenium and webdriver_manager logs
         logging.getLogger('selenium').setLevel(logging.WARNING)
@@ -323,7 +323,7 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
                 except Exception as e:
                     return f"failed with {e}"
         return vars()
-        def _task__init__(self) -> None:
+        def __init__task(self) -> None:
             print('MSG component equipped!!')
     def MASIS_InvQry() -> dict[str, any]:
         def MASIS_InvQry_handler(self, source:list[str], **kwargs) -> None:
@@ -869,22 +869,22 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
                 return "succeeded"
             except Exception as e:
                 return f"failed with {e}"
-        def _task__init__(self) -> None:
+        def __init__task(self) -> None:
             self.get(self._sharepoint_base_url)
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
     def _loader_init_remove() -> dict[str, any]:
-        def _loader__init__(self, task) -> None:
+        def __init__loader(self, task) -> None:
             if task != 'sharepoint':self.login_cht()
-        def _loader__remove__(self, task) -> None:
+        def __remove__loader(self, task) -> None:
             pass
         return vars()
     return {key: func() for key, func in vars().items()}
 
-class _cs_loader_components:
+class CsLoaderComponent:
     def load_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._loadable_components.keys())
+            args = [*self._loadable_components]
             args.remove('_loader_init_remove')
         for task in args:
             if task in self._loaded_components:
@@ -893,15 +893,15 @@ class _cs_loader_components:
             if task in list(self._loadable_components.keys()) + ['ALL']:
                 for key, value in self._loadable_components[task].items():
                     match key:
-                        case '_task__init__':
+                        case '__init__task':
                             MethodType(value, self)()
-                        case '_task__remove__':
+                        case '__remove__task':
                             pass
                         case _:
                             setattr(self, key, MethodType(value, self) if callable(value) else value)
             else:
                 raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._loadable_components.keys())} or 'ALL' ")
-            MethodType(self._loadable_components['_loader_init_remove']['_loader__init__'], self)(task)
+            MethodType(self._loadable_components['_loader_init_remove']['__init__loader'], self)(task)
             self._loaded_components.append(task)
             fn_log(f"{task} loaded successfully")
         return None
@@ -913,24 +913,24 @@ class _cs_loader_components:
             if task in self._loaded_components:
                 for key,value in self._loadable_components[task].items():
                     match key:
-                        case '_task__init__':
+                        case '__init__task':
                             pass
-                        case '_task__remove__':
+                        case '__remove__task':
                             MethodType(value, self)()
                         case _:
                             if hasattr(self, key):delattr(self, key)
-                MethodType(self._loadable_components['_loader_init_remove']['_loader__remove__'], self)(task)
+                MethodType(self._loadable_components['_loader_init_remove']['__remove__loader'], self)(task)
                 self._loaded_components.remove(task)
                 fn_log(f"{task} removed successfully")
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
         return None
-    def __init__(self, *args, loadable_components:dict, **kwargs):
+    def __init__(self, *args, loadable_components:dict):
         self._loadable_components = loadable_components
         self._loaded_components = []
         if args:self.load_components(*args)
 
-class _cs_cht_components:
+class CsChtComponent:
     def login_cht(self) -> object:
         if not self._login_cht:
             OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
@@ -958,14 +958,6 @@ class CsMultiplify:
         if index is None:index = 0 
         self._index = index
 
-dic_cs={
-    _cs_basic_components:[],
-    _cs_my_drive_components:[],
-    _cs_loader_components:['args', 'loadable_components'],
-    _cs_cht_components:[],
-    CsMultiplify:['index']
-}
-
 # class components
 def cs_factory(dic_cs):
     # create class skelton
@@ -973,10 +965,32 @@ def cs_factory(dic_cs):
         pass
     def _init(self, *args, **kwargs):
         # set attributes
-        for Cs, lst_arguments in dic_cs.items():
-            _args = args if 'args' in lst_arguments and lst_arguments.remove('args') is None else []
-            _kwargs = {key: kwargs.get(key) for key in lst_arguments}
+        for Cs, all_args in dic_cs.items():
+            if all_args is None:continue
+            _args = all_args.get('basic_args', set()) | set(args) if 'args' in all_args.get('arguments', []) and all_args['arguments'].remove('args') is None else set()
+            _kwargs = all_args.get('basic_kwargs', {}) | {key: kwargs.get(key) for key in all_args.get('arguments', [])}
             Cs.__init__(self, *_args, **_kwargs)
     setattr(_Cs, "__init__", _init)
     return _Cs
 
+dic_cs_cht_drive = {
+    webdriver.Edge: None,
+    CsBasicComponent: None,
+    CsMyDriveComponent: {},
+    CsLoaderComponent:{
+        'arguments':['args'],
+        'basic_kwargs':{'loadable_components':spit_cht_crawlers_loadable_components()}
+    },
+    CsChtComponent: {},
+    CsMultiplify: {
+        'arguments': ['index']
+    },
+}
+
+dic_cs_test = {
+    webdriver.Edge : None,
+    test : {},
+    CsMultiplify: {
+        'arguments': ['index']
+    },
+}
