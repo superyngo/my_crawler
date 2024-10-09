@@ -11,18 +11,6 @@ from modules.bin import *
 from typing import TypedDict, Any
 from types import MethodType
 
-class test():
-    def __init__(self, *args, **kwargs):
-        if args:self.args=list(args)
-        if kwargs:self.kwargs=kwargs
-    def bark(self, *args, source, **kwargs):
-        print(source)
-        print(list(args))
-        print(kwargs)
-    def woof(self, *args, **kwargs):
-        print(list(args))
-        print(kwargs)
-
 class CsMyClass:
     def __init__(self, **kwargs) -> None:
         dic_default_values = {} # if default needed
@@ -175,7 +163,6 @@ class CsMSGReport(CsMyClass):
         self.new_name = f"{self.prefix}_{self.filename}_{self.postfix}.{self.filename_extension}" if bool(self.postfix) else f"{self.prefix}_{self.filename}.{self.filename_extension}"
         self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
 
-
 class CsBasicComponent:
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
@@ -237,7 +224,7 @@ class CsMyDriveComponent:
         super(type(self),self).__init__(service=service, options=options)
         self.int_main_window_handle = self.current_window_handle
 
-def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
+def _spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
     def MSG() -> dict[str, any]:
         def MSG_handler(self, source:list[str], handle_check_online:bool=True, **kwargs) -> None:
             _BASE_URL = 'https://msgrpt.cht.com.tw/RsView12/RsPortal.aspx'
@@ -323,7 +310,7 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
                 except Exception as e:
                     return f"failed with {e}"
         return vars()
-        def __init__task(self) -> None:
+        def __init__component(self) -> None:
             print('MSG component equipped!!')
     def MASIS_InvQry() -> dict[str, any]:
         def MASIS_InvQry_handler(self, source:list[str], **kwargs) -> None:
@@ -410,10 +397,10 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
             int_total = len(source)
             int_finished_count = 0
             DIC_COLUMNS_NAMES_CONTRACT_ITEMS = {
-                12 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註'], '一般'],
-                13 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '小計調整', '備註'], '一般'],
-                15 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '幣別', '外幣單價', '單價', '外幣小計', '小計', '備註'], '外幣'],
-                20 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註', '查型錄', '優惠計算說明', '查證方式', '查證金額', '查證結果', '契約類別', '來源契約編號', '共同供應契約資訊'], '共契']
+                12: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註'], '一般'],
+                13: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '小計調整', '備註'], '一般'],
+                15: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '幣別', '外幣單價', '單價', '外幣小計', '小計', '備註'], '外幣'],
+                20: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註', '查型錄', '優惠計算說明', '查證方式', '查證金額', '查證結果', '契約類別', '來源契約編號', '共同供應契約資訊'], '共契']
             }
             for contract in source:
                 int_finished_count += 1
@@ -726,16 +713,16 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
                 lst_batches = [batch.split()[1] for batch in _lst_batches]
                 # Extract batch details
                 dic_batches_data = {
-                    'contract' : contract,
-                    'temp_batch' : "",
-                    'data' : {
-                        'info' : [],
-                        '點收單' : [],
-                        '收料單' : [],
-                        '請款單' : []
+                    'contract': contract,
+                    'temp_batch': "",
+                    'data': {
+                        'info': [],
+                        '點收單': [],
+                        '收料單': [],
+                        '請款單': []
                     },
-                    'check_currency' : self._try_currency(),
-                    'postfix' : '外幣' if self._try_currency() else '一般',
+                    'check_currency': self._try_currency(),
+                    'postfix': '外幣' if self._try_currency() else '一般',
                 }
                 int_total_batches, int_fetched_batch = len(lst_batches), 0
                 for batch in lst_batches:
@@ -819,12 +806,12 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
             lst_inserted_batch = [[contract] + [batch] + sublist for sublist in i]
             return lst_inserted_batch
         _dic_EPIS_contract_batch_db_names = {
-            '一般' : ['EPIS_contract_batch', ['id', '契約編號', '批次', '約定履約日期', '履約日期', '"履約金額(含稅)"', '履約明細金額總計']],
+            '一般': ['EPIS_contract_batch', ['id', '契約編號', '批次', '約定履約日期', '履約日期', '"履約金額(含稅)"', '履約明細金額總計']],
             '外幣': ['EPIS_contract_batch', ['id', '契約編號', '批次', '約定履約日期', '履約日期', '"履約金額(含稅)"', '進口匯率', '匯率日期', '履約明細金額總計', '器材款FCA', '交貨總金額', '成本分析表總價', '換算比例', '幣別']],
-            '類型有誤' : None,
-            '點收單' : ['EPIS_contract_batch_Pick', ['契約編號', '批次', '點收單號', '代建物品增加單', '收貨單位', '點收員工']],
-            '收料單' : ['EPIS_contract_batch_RS2901RA4L', ['契約編號', '批次'',' '庫號', '庫名', '收料單號', '到料日期']],
-            '請款單' : ['EPIS_contract_batch_RSapay', ['契約編號', '批次', '往請款作業', '請款單號', '類別', '狀態']]
+            '類型有誤': None,
+            '點收單': ['EPIS_contract_batch_Pick', ['契約編號', '批次', '點收單號', '代建物品增加單', '收貨單位', '點收員工']],
+            '收料單': ['EPIS_contract_batch_RS2901RA4L', ['契約編號', '批次'',' '庫號', '庫名', '收料單號', '到料日期']],
+            '請款單': ['EPIS_contract_batch_RSapay', ['契約編號', '批次', '往請款作業', '請款單號', '類別', '狀態']]
         }
         def  _EPIS_contract_batch_save_db(self, dict_contract_batches:dict) -> None:
             data, postfix, contract = dict_contract_batches['data'], dict_contract_batches['postfix'], dict_contract_batches['contract']
@@ -869,19 +856,27 @@ def spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
                 return "succeeded"
             except Exception as e:
                 return f"failed with {e}"
-        def __init__task(self) -> None:
+        def __init__component(self) -> None:
             self.get(self._sharepoint_base_url)
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
+    def google() -> dict[str, any]:
+        def __init__component(self, *args, **kwargs):
+            self.get('https://google.com')
+        return vars()
     def _loader_init_remove() -> dict[str, any]:
         def __init__loader(self, task) -> None:
-            if task != 'sharepoint':self.login_cht()
+            if task not in ['sharepoint', 'google']:self.login_cht()
         def __remove__loader(self, task) -> None:
             pass
         return vars()
     return {key: func() for key, func in vars().items()}
 
 class CsLoaderComponent:
+    def __init__(self, *args, loadable_components:dict):
+        self._loadable_components = loadable_components
+        self._loaded_components = []
+        if args:self.load_components(*args)
     def load_components(self, *args) -> None:
         if 'ALL' in args:
             args = [*self._loadable_components]
@@ -893,9 +888,9 @@ class CsLoaderComponent:
             if task in list(self._loadable_components.keys()) + ['ALL']:
                 for key, value in self._loadable_components[task].items():
                     match key:
-                        case '__init__task':
+                        case '__init__component':
                             MethodType(value, self)()
-                        case '__remove__task':
+                        case '__remove__component':
                             pass
                         case _:
                             setattr(self, key, MethodType(value, self) if callable(value) else value)
@@ -913,9 +908,9 @@ class CsLoaderComponent:
             if task in self._loaded_components:
                 for key,value in self._loadable_components[task].items():
                     match key:
-                        case '__init__task':
+                        case '__init__component':
                             pass
-                        case '__remove__task':
+                        case '__remove__component':
                             MethodType(value, self)()
                         case _:
                             if hasattr(self, key):delattr(self, key)
@@ -925,12 +920,8 @@ class CsLoaderComponent:
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
         return None
-    def __init__(self, *args, loadable_components:dict):
-        self._loadable_components = loadable_components
-        self._loaded_components = []
-        if args:self.load_components(*args)
 
-class CsChtComponent:
+class CsChtCrawlerComponent:
     def login_cht(self) -> object:
         if not self._login_cht:
             OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
@@ -953,44 +944,149 @@ class CsChtComponent:
             return False
     def __init__(self):
         self._login_cht = False
-class CsMultiplify:
-    def __init__(self, index = 0):
-        if index is None:index = 0 
+class CsMultiSeed:
+    def __init__(self, index):
         self._index = index
+class CsMultiManager:
+    def __init__(self, *args, **kwargs) -> None: 
+        for key, value in ({'instances':{}, 'sources':{}} | kwargs).items():
+            setattr(self, '_' + key, value)
+        if args:self.args = set(args)
+        if kwargs:self.kwargs = kwargs
+        # init instances
+        if self._threads > 0: self._init_instances(crawlers_components = self._crawlers_components)
 
-# class components
-def cs_factory(dic_cs):
+    def _init_instances(self, *args, threads:int=None, **kwargs) -> None:
+        def _init_instance(*args, index, **kwargs):
+            if index in self._instances:
+                return
+            self._instances.update({index:self._subclass(*args, index=index, **kwargs)})
+        multithreading(
+            source = None,
+            call_def = _init_instance,
+            threads = self._threads if threads is None else threads,
+            args = args,
+            kwargs = kwargs
+        )
+    def _call_instances(self, handler:str, threads:int=None) -> callable:
+        if self._threads==0:raise ValueError('current there is no thread')
+        threads = threads if threads and threads <= self._threads else self._threads
+        def _def_wrapper(*args, source:any=None, **kwargs):
+            # split source into self._sources
+            if isinstance(source,(list, tuple, dict)):
+                self._sources = {}
+                multithreading(
+                    source = source,
+                    call_def = lambda source, index:self._sources.update({index: source}),
+                    threads = threads,
+                )
+            # execute instances def
+            multithreading(
+                source = source,
+                call_def = lambda *args, index, **kwargs:getattr(self._instances[index], handler)(*args, **kwargs),
+                threads = threads,
+                args = args,
+                kwargs = kwargs
+            )
+        return _def_wrapper
+    @property # Getter
+    def threads(self) -> int:
+        return self._threads
+    @threads.setter # Setter
+    def threads(self, threads:int) -> None:
+        if not isinstance(threads, int) or threads<0:raise TypeError(f"threads must > 0")
+        match threads:
+            case self._threads:
+                fn_log(f"current threads {threads} unchanged")
+            case _ if threads > self._threads:
+                self._init_instances(*self._loaded_instances_components, threads = threads, crawlers_components = self._crawlers_components)
+            case _ if threads < self._threads:
+                for i in range(threads, self._threads):
+                    if hasattr(self._instances[i],'close'):self._instances[i].close()
+                    self._instances.pop(i)
+        self._threads = threads
+
+class CsMultiEntryForLoader:
+    def __init__(self, *args, _instance_loadable_components):
+        self._instance_loadable_components = _instance_loadable_components
+        self._loaded_instances_components=[]
+        if args:self._load_instances_components(*args)
+    def _load_instances_components(self, *args, threads=None) -> None:
+        if 'ALL' in args:
+            args = list(self._crawlers_components.keys())
+        for task in args:
+            if task in self._loaded_instances_components:
+                fn_log(f"{task} has already been loaded so skip")
+                continue
+            if task in list(self._crawlers_components.keys()) + ['ALL']:
+                # load component for instances
+                self._call_instances(handler='_load_components')(task)
+                # set handler entrance for multi_manager
+                for handler in self._crawlers_components[task].keys():
+                    if not task.startswith("_"):
+                        setattr(self, handler, self._call_instances(handler=handler, threads=threads))
+            else:
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
+            self._loaded_instances_components += [task]
+            fn_log(f"{task} entry loaded successfully")
+    def _remove_instances_components(self, *args) -> None:
+        _args = self._loaded_instances_components.copy() if 'ALL' in args else args
+        for task in _args:
+            if task in self._loaded_instances_components:
+                # remove component for instances
+                self._call_instances('_remove_components')(task)
+                for key in self._crawlers_components[task].keys():
+                    if 'handler' in key and hasattr(self, key):
+                        delattr(self, key)
+                self._loaded_instances_components.remove(task)
+                fn_log(f"{task} entry removed successfully")
+            else:
+                raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
+
+# class factory
+def cs_factory(dic_cs:dict):
     # create class skelton
     class _Cs(*dic_cs):
+        __slots__ = {slot for base in dic_cs if hasattr(base, '__slots__') for slot in getattr(base, '__slots__')}
         pass
     def _init(self, *args, **kwargs):
         # set attributes
         for Cs, all_args in dic_cs.items():
             if all_args is None:continue
-            _args = all_args.get('basic_args', set()) | set(args) if 'args' in all_args.get('arguments', []) and all_args['arguments'].remove('args') is None else set()
-            _kwargs = all_args.get('basic_kwargs', {}) | {key: kwargs.get(key) for key in all_args.get('arguments', [])}
+            default_args, default_kwargs = all_args.get('default_args', set()), all_args.get('default_kwargs', {})
+            _args = default_args - {'args', 'kwargs'} | set(args) if 'args' in default_args else default_args - {'kwargs'}
+            _kwargs = default_kwargs | kwargs if 'kwargs' in default_args else {key: kwargs.get(key, value) for key, value in default_kwargs.items()}
             Cs.__init__(self, *_args, **_kwargs)
     setattr(_Cs, "__init__", _init)
     return _Cs
 
-dic_cs_cht_drive = {
+dic_cs_cht_crawler = {
     webdriver.Edge: None,
     CsBasicComponent: None,
     CsMyDriveComponent: {},
-    CsLoaderComponent:{
-        'arguments':['args'],
-        'basic_kwargs':{'loadable_components':spit_cht_crawlers_loadable_components()}
+    CsChtCrawlerComponent: {},
+    CsLoaderComponent: {
+        'default_args': {'args'},
+        'default_kwargs': {'loadable_components': _spit_cht_crawlers_loadable_components()}
     },
-    CsChtComponent: {},
-    CsMultiplify: {
-        'arguments': ['index']
+    CsMultiSeed: {
+        'default_kwargs':{'index': 0}        
     },
 }
 
-dic_cs_test = {
-    webdriver.Edge : None,
-    test : {},
-    CsMultiplify: {
-        'arguments': ['index']
+dic_cs_cht_multi_manager = {
+    CsMultiManager: {
+        'default_args': {'args', 'kwargs'},
+        'default_kwargs': {
+            'threads': 1,
+            'subclass': cs_factory(dic_cs_cht_crawler)
+        }
+    },
+    CsMultiEntryForLoader: {
+        'default_args': {'args'},
+        'default_kwargs': {
+            'index': 0,
+            'instance_loadable_components': _spit_cht_crawlers_loadable_components()
+        }
     },
 }

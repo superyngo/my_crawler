@@ -164,12 +164,6 @@ class CsMSGReport(CsMyClass):
         self.new_name = f"{self.prefix}_{self.filename}_{self.postfix}.{self.filename_extension}" if bool(self.postfix) else f"{self.prefix}_{self.filename}.{self.filename_extension}"
         self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
 
-class CsSplittedDrivers(CsMyClass):
-    class CsSlotTypes(TypedDict):
-        driver:object
-        data:list
-    __slots__ = list(CsSlotTypes.__annotations__.keys())
-
 def _store_crawlers_components() -> dict[str, dict[str, Any]]:
     def MSG() -> dict[str, any]:
         def MSG_handler(self, source:list[str], handle_check_online:bool=True, **kwargs) -> None:
@@ -806,6 +800,13 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             self.get(self._sharepoint_base_url)
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
+    def google() -> dict[str, any]:
+        def __init__(self, *args, **kwargs):
+            print('in google')
+            print(args)
+            print(kwargs)
+            self.get('https://google.com')
+        return vars()
     return {key: func() for key, func in vars().items()}
 _crawlers_components = _store_crawlers_components()
 def _store_loader_components() -> dict[str, any]:
@@ -872,7 +873,7 @@ def _store_common_crawlers_components() -> dict[str, any]:
         for key, value in (default|kwargs).items():
             setattr(self, '_' + key, value)
         self._load_components(*args)
-        if 'sharepoint' not in args:self.login_cht()
+        if 'sharepoint' not in args or 'google' not in args:self.login_cht()
     return vars()
 _common_crawlers_components = _store_common_crawlers_components()
 
@@ -949,13 +950,16 @@ class CsDriverCrawler(CsMyDriver):
 
 class CsMultiCrawlersManager(CsMyClass):
     def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
+        print(f"args:{args}")
+        print(f"config:{config}")
+        print(f"kwargs:{kwargs}")
         default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'crawlers_components':_crawlers_components}
         for key, value in default_config.items():
             setattr(self, '_' + key, config.get(key, value))
         if args:self.args = list(args)
         if kwargs:self.kwargs = kwargs
         # init instances
-        if self._threads > 0:self._init_instances(crawlers_components = self._crawlers_components)
+        if self._threads > 0:self._init_instances(*args, crawlers_components = self._crawlers_components)
         # load components for crawlers
         self._loaded_instances_components=[]
         if args:self._load_instances_components(*args)
