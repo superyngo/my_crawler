@@ -61,7 +61,7 @@ def split_to_dict(source:any, num:int=1) -> dict[int, any]:
 def create_lst_of(n:int, element={'index': None, 'driver': None, 'list': []}):
     return [element for _ in range(n)]
 
-def multithreading(source:any, call_def:callable, threads:int = 1, args=[], kwargs={}):
+def multithreading(source:any, call_def:callable, threads:int=1, args:list=[], kwargs:dict={}):
     with ThreadPoolExecutor(max_workers=threads) as executor:
         match source:
             case None:

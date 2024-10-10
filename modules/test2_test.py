@@ -64,6 +64,22 @@ from modules.test2 import *
 
 CsComposedLoadableDrive = cs_factory(dic_cs_cht_crawler)
 cht_drive = CsComposedLoadableDrive('google')
+cht_drive.remove_components('google')
+cht_drive.get('https://yahoo.com')
+cht_drive.load_components('google')
 cht_drive2 = CsComposedLoadableDrive('google')
 cht_drive.close()
 cht_drive2.close()
+
+from modules.test2 import * 
+CsMultiChtCrawler = cs_factory(dic_cs_cht_multi_manager)
+cht_multi_crawler = CsMultiChtCrawler()
+cht_multi_crawler.remove_instances_components('google')
+cht_multi_crawler.load_instances_components('google')
+cht_multi_crawler.google_handler()
+cht_multi_crawler.google_handler(threads=2)
+cht_multi_crawler.google_handler(threads=1)
+cht_multi_crawler.google_handler(threads=0)
+cht_multi_crawler.load_instances_components('google',threads=3)
+cht_multi_crawler.threads=0
+cht_multi_crawler.crawling_main(task='google', source=[], threads=3)
