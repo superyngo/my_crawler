@@ -10,7 +10,8 @@ import data.source_MSG_Reports
 # lst_items = ["02502735","21190613"]
 # lst_source_MSG_reports = [{'name' : 'RS4212RA4L','postfix' : '50502'}] # {'name' : 'RS5203A' , 'prefix' : '20240110'} 
 
-multi_driver_crawler = CsMultiCrawlersManager('google')
+CsComposedLoadableDrive = cs_factory(dic_cs_cht_crawler)
+multi_driver_crawler = CsMultiCrawlersManager()
 
 task = None
 while task != "stop":
