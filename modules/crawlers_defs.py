@@ -11,7 +11,6 @@ from modules.bin import *
 from typing import TypedDict, Any
 from types import MethodType
 
-# source objects
 class CsMyClass:
     def __init__(self, **kwargs) -> None:
         dic_default_values = {} # if default needed
@@ -40,7 +39,7 @@ class CsMSGReport(CsMyClass):
         new_name: str
         new_path: str
     __slots__ = list(CsSlotTypes.__annotations__.keys())
-    def __init__(self, name:str, prefix:str = None, postfix:str = None, set_report:dict = {}, set_report_attribute:dict = {}, handle_check_online:bool = True, show_report:bool = True) -> None:
+    def __init__(self, name: str, prefix: str = None, postfix: str = None, set_report: dict = {}, set_report_attribute: dict = {}, handle_check_online: bool = True, show_report: bool = True) -> None:
         self.filename = self.name = name
         self.filename_extension = 'xlsx'
         self.postfix = postfix
@@ -164,9 +163,67 @@ class CsMSGReport(CsMyClass):
         self.new_name = f"{self.prefix}_{self.filename}_{self.postfix}.{self.filename_extension}" if bool(self.postfix) else f"{self.prefix}_{self.filename}.{self.filename_extension}"
         self.new_path = f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{self.new_name}" 
 
-def _store_crawlers_components() -> dict[str, dict[str, Any]]:
+class CsBasicComponent:
+    def __getattr__(self, name):
+        raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
+
+class CsMyDriveComponent:
+    def _select_change_value(self, By_locator: str, locator: str, new_value: str) -> None:
+        _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
+        _select_element = Select(_select_element)  # Create a Select instance
+        _select_element.select_by_value(new_value)
+    def _input_send_keys(self, By_locator: str, locator: str, new_value: str) -> None:
+        _input_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
+        _input_element.clear()
+        _input_element.send_keys(new_value)
+    def _wait_element(self, By_locator: str, locator: str, time: int = 1000):
+        try:
+            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
+        except UnexpectedAlertPresentException:
+            try:
+                self.switch_to.alert.accept()
+            except NoAlertPresentException:
+                pass
+            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
+    def _try_extract_element_value(self, element, error_return = "") -> str:
+        try:
+            match element.tag_name:
+                case 'input' | 'textarea':
+                    if element.get_attribute('type') == 'checkbox':
+                        return element.get_attribute('checked')
+                    return element.get_attribute('value')
+                case 'select':
+                    return Select(element).first_selected_option.text
+                case _:
+                    return element.text
+        except NoSuchElementException:
+            return error_return
+    def __init__(self):
+        import logging
+        # Suppress selenium and webdriver_manager logs
+        logging.getLogger('selenium').setLevel(logging.WARNING)
+        logging.getLogger('urllib3').setLevel(logging.WARNING)
+        logging.getLogger('webdriver_manager').setLevel(logging.WARNING)
+        edge_bin = './bin/msedgedriver.exe'
+        port = 4444
+        service_args=[
+                    #   '--log-level=ALL',
+                    #   '--append-log',
+                    #   '--readable-timestamp',
+                    '--disable-build-check',
+                    ]
+        service = Service(executable_path=edge_bin, service_args=service_args)
+        options = Options()
+        options.add_argument('--disable-notifications')
+        options.add_argument('--inprivate')
+        options.add_argument("--disable-notifications")
+        options.add_argument("--log-level=3")
+        super(type(self),self).__init__(service=service, options=options)
+        self.int_main_window_handle = self.current_window_handle
+
+def _spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
     def MSG() -> dict[str, any]:
-        def MSG_handler(self, source:list[str], handle_check_online:bool=True, **kwargs) -> None:
+        def MSG_handler(self, source: list[str], handle_check_online: bool=True, **kwargs) -> None:
             _BASE_URL = 'https://msgrpt.cht.com.tw/RsView12/RsPortal.aspx'
             self.get(_BASE_URL)
             # Login to sharepoint
@@ -180,8 +237,8 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     fn_log(f"{self._index}:{report.new_name} already uploaded!")
                     continue
                 # fetch
-                fn_log(f"{self._index}:Start fetching {report.prefix} {report.name} {report.postfix if report.postfix else ""}")
-                fn_log(f"{self._index}:Fetching {report.new_name} {self._MSG_query(report = report)}!!")
+                fn_log(f"{self._index}: Start fetching {report.prefix} {report.name} {report.postfix if report.postfix else ""}")
+                fn_log(f"{self._index}: Fetching {report.new_name} {self._MSG_query(report = report)}!!")
                 while not os.path.exists(report.old_path):
                     time.sleep(3)
                 # Rename and move
@@ -192,11 +249,11 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     fn_log(f"{report.new_path} already exists")
                 # upload
                 if handle_check_online:
-                    fn_log(f"{self._index}:Start uploading {report.new_path}, please wait for uploading.")
-                    fn_log(f"{self._index}:Upload {report.new_path} {driver_sharepoint.sharepoint_upload(report)}!!")
+                    fn_log(f"{self._index}: Start uploading {report.new_path}, please wait for uploading.")
+                    fn_log(f"{self._index}: Upload {report.new_path} {driver_sharepoint.sharepoint_upload(report)}!!")
             if handle_check_online:
                 driver_sharepoint.close()
-        def _MSG_query(self, report:CsMSGReport) -> None:
+        def _MSG_query(self, report: CsMSGReport) -> None:
                 try:
                     # choose report
                     for id, value in report.set_report.items():
@@ -250,17 +307,17 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 except Exception as e:
                     return f"failed with {e}"
         return vars()
-        def __init__(self) -> None:
+        def __init__component(self) -> None:
             print('MSG component equipped!!')
     def MASIS_InvQry() -> dict[str, any]:
-        def MASIS_InvQry_handler(self, source:list[str], **kwargs) -> None:
+        def MASIS_InvQry_handler(self, source: list[str], **kwargs) -> None:
             _BASE_URL = 'https://masis.cht.com.tw/IV_Net/IvQry/Inv/InvQry.aspx'
             _task_name = 'MASIS_InvQry'
             self.get(_BASE_URL)
             # main
             for txtWhno in source:     
                 lst_data = []   
-                fn_log(f"{self._index}:start fetching {txtWhno} inventory")
+                fn_log(f"{self._index}: start fetching {txtWhno} inventory")
                 # Input contract ID
                 lst_data = self._MASIS_InvQry_query(txtWhno = txtWhno)
                 with DatabaseManager(DB_PATH) as db:
@@ -274,7 +331,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     lst_sql_columns = ['項次', '庫號', '材料編號', '名稱', '料別', '呆料', '最高庫存', '實際庫存', '可用庫存', '待收數', '待退數', '待調出數', '待撥入數', '待發數', '安全存量', '上月結存數', '上月單價', '累退數', '累調出數', '累撥入數', '累領數', '料位', '管料員']
                     db.write_db(dbname=_task_name, columns=lst_sql_columns, records=lst_data)
                 fn_log(f"{self._index}:{txtWhno} inventory {len(lst_data)} records saved")
-        def _MASIS_InvQry_query(self, txtWhno:str) -> list:
+        def _MASIS_InvQry_query(self, txtWhno: str) -> list:
             self._input_send_keys(By.ID, 'ContentPlaceHolder1_txtWhno', txtWhno)
             self._wait_element(By.ID, 'ContentPlaceHolder1_btnQry').click()
             time.sleep(1) # Adjust the delay as needed
@@ -288,7 +345,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 return lst_data
             except TimeoutException:
                 return []
-        def _MASIS_InvQry_extract_table_html(self, int_total_pages:int) -> list:
+        def _MASIS_InvQry_extract_table_html(self, int_total_pages: int) -> list:
             lst_data = []
             # initialize paging
             for page in range(1, int_total_pages + 1):
@@ -332,31 +389,31 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             return data
         return vars()
     def EPIS_contract_info_items() -> dict[str, any]:
-        def EPIS_contract_info_items_handler(self, source:list[str], **kwargs):
+        def EPIS_contract_info_items_handler(self, source: list[str], **kwargs):
             EPIS_contract_info_task_name, EPIS_contract_items_task_name = 'EPIS_contract_info', 'EPIS_contract_items'
             int_total = len(source)
             int_finished_count = 0
             DIC_COLUMNS_NAMES_CONTRACT_ITEMS = {
-                12 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註'], '一般'],
-                13 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '小計調整', '備註'], '一般'],
-                15 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '幣別', '外幣單價', '單價', '外幣小計', '小計', '備註'], '外幣'],
-                20 : [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註', '查型錄', '優惠計算說明', '查證方式', '查證金額', '查證結果', '契約類別', '來源契約編號', '共同供應契約資訊'], '共契']
+                12: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註'], '一般'],
+                13: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '小計調整', '備註'], '一般'],
+                15: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '幣別', '外幣單價', '單價', '外幣小計', '小計', '備註'], '外幣'],
+                20: [['id', '契約編號', '材料編號', '名稱', '單位', '明細來源', 'IT類別', '規格', '數量', '單價', '小計', '備註', '查型錄', '優惠計算說明', '查證方式', '查證金額', '查證結果', '契約類別', '來源契約編號', '共同供應契約資訊'], '共契']
             }
             for contract in source:
                 int_finished_count += 1
                 # fetch info
                 lst_info_data = []
                 try:
-                    fn_log(f"{self._index}:Start fetching {contract} info.")
+                    fn_log(f"{self._index}: Start fetching {contract} info.")
                     lst_info_data = [contract] + self._EPIS_contract_info_query(contract = contract)
-                    fn_log(f"{self._index}:Fetching {contract} info succeed, proceed to fetch items.")
+                    fn_log(f"{self._index}: Fetching {contract} info succeed, proceed to fetch items.")
                 except TimeoutException:
                     fn_log(f"{self._index}:{contract} has no info data. {int_finished_count} of {int_total} finished")
                     continue
                 # fetch items
                 lst_items_data = []
                 try:
-                    fn_log(f"{self._index}:Start fetching {contract} items.")
+                    fn_log(f"{self._index}: Start fetching {contract} items.")
                     lst_items_data = self._EPIS_contract_items_query(contract = contract)
                     # sample out corresponding columns and type
                     lst_items_sql_columns, str_type = DIC_COLUMNS_NAMES_CONTRACT_ITEMS[len(lst_items_data[0])]
@@ -365,21 +422,21 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     pass
                 except TimeoutException:
                     fn_log(f"{self._index}:{contract} has no items data. {int_finished_count} of {int_total} finished")
-                    continue
                 with DatabaseManager(DB_PATH) as db:
                     # Write contract info
                     lst_info_sql_columns = ['契約編號', '契約幣別', '契約金額_外幣', '台銀賣出匯率日期', '台銀即期賣出匯率', '國際貿易條件', '約定履約日期', '決標資訊', '免收履約保證金', '履約保證金繳納方式', '履約保證金額', '履約保證有效期限', '免收保固保證金', '保固保證金繳納方式', '保固保證金額', '保固保證有效期限', '保固期限', '已全部請款完畢', '契約是否變更', '最後契約變更日期', '契約備註', '契約狀態']
                     db.write_db(dbname=EPIS_contract_info_task_name, columns=lst_info_sql_columns, records=[lst_info_data])
-                    # Write Types
-                    db.execute_query(f"INSERT OR REPLACE INTO EPIS_contract_type (契約編號, 契約類別) VALUES ('{contract}', '{str_type}')")
                     # DELETE operation
                     db.execute_query(f"DELETE FROM {EPIS_contract_items_task_name} WHERE 契約編號 = '{contract}'")
-                    # Write contract items
-                    db.write_db(dbname=EPIS_contract_items_task_name, columns=lst_items_sql_columns, records=lst_items_data)
+                    if lst_items_data:
+                        # Write Types
+                        db.execute_query(f"INSERT OR REPLACE INTO EPIS_contract_type (契約編號, 契約類別) VALUES ('{contract}', '{str_type}')")
+                        # Write contract items
+                        db.write_db(dbname=EPIS_contract_items_task_name, columns=lst_items_sql_columns, records=lst_items_data)
                 fn_log(f"{self._index}:{contract} info saved to {EPIS_contract_info_task_name}!")
                 fn_log(f"{self._index}:{contract} items saved to {EPIS_contract_items_task_name}!")
         # EPIS_contract_info
-        def _EPIS_contract_info_query(self, contract:str) -> list:
+        def _EPIS_contract_info_query(self, contract: str) -> list:
             BASE_URL = 'https://epis.cht.com.tw/epis100/Pages/GContract/Contract.aspx?f=G_ContractEdit&cid='
             self.get(BASE_URL + contract)
             _wait = self._wait_element(By.XPATH, f"//span[contains(text(), '契約編號：{contract}')]")
@@ -389,27 +446,27 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             except TimeoutException:
                 raise TimeoutException
         def _EPIS_contract_info_extract_table_html(self) -> list:
-            str_契約幣別 = self._try_extract_element_value(By.XPATH, "//th[contains(text(), '契約幣別')]")
-            str_契約金額_外幣 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl38$ctl00')
-            str_台銀賣出匯率日期 = convert_roc_to_western(self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl33'))
-            str_台銀即期賣出匯率 = self._try_extract_element_value(By.XPATH, "//th[contains(text(), '台銀即期賣出匯率')]")
-            str_國際貿易條件 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl49')
-            str_約定履約日期 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl59') + self._try_extract_element_value(By.XPATH, "//th[contains(text(), '約定履約日期')]")
-            str_決標資訊 = self._try_extract_element_value(By.ID, 'ctl00_ContentPlaceHolder1_EditView_PurchaseContract_AutoLabel_AwardInfo')
-            str_免收履約保證金 = self._try_extract_element_value(By.ID, 'ctl00_ContentPlaceHolder1_EditView_PurchaseContract_ctl135')
-            str_履約保證金繳納方式 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl138')
-            str_履約保證金額 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl140$ctl00')
-            str_履約保證有效期限 = convert_roc_to_western(self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl143'))
-            str_免收保固保證金 = self._try_extract_element_value(By.ID, 'ctl00_ContentPlaceHolder1_EditView_PurchaseContract_ctl146')
-            str_保固保證金繳納方式 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl149')
-            str_保固保證金額 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl151$ctl00')
-            str_保固保證有效期限 = convert_roc_to_western(self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl154'))
-            str_保固期限 = convert_roc_to_western(self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl157'))
-            str_已全部請款完畢 = self._try_extract_element_value(By.ID, 'ctl00_ContentPlaceHolder1_EditView_PurchaseContract_ctl161')
-            str_契約是否變更 = self._try_extract_element_value(By.ID, 'ctl00_ContentPlaceHolder1_EditView_PurchaseContract_ctl163')
-            str_最後契約變更日期 = convert_roc_to_western(self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl165'))
-            str_契約備註 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl167')     
-            str_契約狀態 = self._try_extract_element_value(By.NAME, 'ctl00$ContentPlaceHolder1$EditView_PurchaseContract$ctl169')
+            str_契約幣別 = self._try_extract_th_next_element_value_by_text('契約幣別')
+            str_契約金額_外幣 = self._try_extract_th_next_element_value_by_text('契約金額(外幣)')
+            str_台銀賣出匯率日期 = convert_roc_to_western(self._try_extract_th_next_element_value_by_text('台銀賣出匯率日期'))
+            str_台銀即期賣出匯率 = self._try_extract_th_next_element_value_by_text('台銀即期賣出匯率')
+            str_國際貿易條件 = self._try_extract_th_next_element_value_by_text('國際貿易條件')
+            str_約定履約日期 = self._try_extract_th_next_element_value_by_text('約定履約日期')
+            str_決標資訊 = self._try_extract_th_next_element_value_by_text('決標資訊')
+            str_免收履約保證金 = self._try_extract_th_next_element_value_by_text('履約保證金')
+            str_履約保證金繳納方式 = self._try_extract_th_next_element_value_by_text('履約保證金繳納方式')
+            str_履約保證金額 = self._try_extract_th_next_element_value_by_text('履約保證金額')
+            str_履約保證有效期限 = convert_roc_to_western(self._try_extract_th_next_element_value_by_text('履約保證有效期限'))
+            str_免收保固保證金 = self._try_extract_th_next_element_value_by_text('保固保證金')
+            str_保固保證金繳納方式 = self._try_extract_th_next_element_value_by_text('保固保證金繳納方式')
+            str_保固保證金額 = self._try_extract_th_next_element_value_by_text('保固保證金額')
+            str_保固保證有效期限 = convert_roc_to_western(self._try_extract_th_next_element_value_by_text('保固保證有效期限'))
+            str_保固期限 = convert_roc_to_western(self._try_extract_th_next_element_value_by_text('保固期限'))
+            str_已全部請款完畢 = self._try_extract_th_next_element_value_by_text('已全部請款完畢')
+            str_契約是否變更 = self._try_extract_th_next_element_value_by_text('契約是否變更')
+            str_最後契約變更日期 = convert_roc_to_western(self._try_extract_th_next_element_value_by_text('最後契約變更日期'))
+            str_契約備註 = self._try_extract_th_next_element_value_by_text('契約備註')
+            str_契約狀態 = self._try_extract_th_next_element_value_by_text('契約狀態')
             return [
                 str_契約幣別, str_契約金額_外幣, str_台銀賣出匯率日期, str_台銀即期賣出匯率, str_國際貿易條件,
                 str_約定履約日期, str_決標資訊, str_免收履約保證金, str_履約保證金繳納方式, str_履約保證金額,
@@ -417,7 +474,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 str_保固期限, str_已全部請款完畢, str_契約是否變更, str_最後契約變更日期, str_契約備註, str_契約狀態
             ]
         # EPIS_contract_items
-        def _EPIS_contract_items_query(self, contract:str) -> list:
+        def _EPIS_contract_items_query(self, contract: str) -> list:
             try:
                 BASE_URL = 'https://epis.cht.com.tw/epis100/Pages/GContract/ContractItem.aspx?f=G_ContractItem&cid='
                 self.get(BASE_URL + contract)
@@ -440,7 +497,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 return lst_data
             except TimeoutException:
                 raise TimeoutException
-        def _EPIS_contract_items_extract_table_html(self, int_total_pages:int) -> list:
+        def _EPIS_contract_items_extract_table_html(self, int_total_pages: int) -> list:
             lst_data = []
             check_currency = self._try_currency()
             # initialize paging
@@ -479,7 +536,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 raise TimeoutException
         return vars()
     def MASIS_barcode() -> dict[str, any]:
-        def MASIS_barcode_handler(self, source:dict[str,list[any]], **kwargs) -> None:
+        def MASIS_barcode_handler(self, source: dict[str,list[any]], **kwargs) -> None:
             _task_name = 'MASIS_barcode'
             STR_MASIS_BARCODE_URL = 'https://masis.cht.com.tw/IV_Net/IvQry/Inv/BarcodeQry.aspx'
             self.get(STR_MASIS_BARCODE_URL)
@@ -499,8 +556,8 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     #     fn_log(f"{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\{key}_{zfill_lot} already existed!!")
                     #     continue
                     try:
-                        fn_log(f"{self._index}:Fetching {key} {zfill_lot} data")
-                        lst_data:list[list[str]] = [[key , zfill_lot] + lst for lst in self._MASIS_barcode_query_lot(zfill_lot)]
+                        fn_log(f"{self._index}: Fetching {key} {zfill_lot} data")
+                        lst_data: list[list[str]] = [[key , zfill_lot] + lst for lst in self._MASIS_barcode_query_lot(zfill_lot)]
                         fn_log(f"{self._index}:{key} {zfill_lot} barcode fetched")
                         with DatabaseManager(DB_PATH) as db:
                             # Prepare the SQL query
@@ -510,7 +567,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     except UnexpectedAlertPresentException:
                         fn_log(f"{self._index}:{key} {zfill_lot} has no barcode. {int_finished_count} of {int_total_lots} finished")
                         continue
-        def _MASIS_barcode_query_lot(self, zfill_lot:str) -> list[list[str]]:
+        def _MASIS_barcode_query_lot(self, zfill_lot: str) -> list[list[str]]:
             # Input Lot No.
             self._input_send_keys(By.ID, 'ContentPlaceHolder1_txtLotNo', zfill_lot)
             # Query
@@ -526,7 +583,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             # Extract table data
             lst_data = self._MASIS_barcode_extract_table_html(int_total_pages)
             return lst_data
-        def _MASIS_barcode_extract_table_html(self, int_total_pages:int) -> list[list[str]]:
+        def _MASIS_barcode_extract_table_html(self, int_total_pages: int) -> list[list[str]]:
             lst_data = []
             # initialize paging
             for page in range(1, int_total_pages + 1):
@@ -566,7 +623,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             # fn_log(f"{key}_{zfill_lot}.xlsx saved!! {int_finished_count} of {int_total_lots} finished")
             pass
     def MASIS_item_detail() -> dict[str, any]:
-        def MASIS_item_detail_handler(self, source:list[str], **kwargs):
+        def MASIS_item_detail_handler(self, source: list[str], **kwargs):
             _task_name = 'MASIS_item_detail'
             _BASE_URL = 'https://masis.cht.com.tw/masis/NM/Mano/ManoMtn.aspx?t=m'
             self.get(_BASE_URL)
@@ -577,15 +634,15 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             for item in source:        
                 int_finished_count += 1
                 try:
-                    fn_log(f"{self._index}:Fetching {item} details")
+                    fn_log(f"{self._index}: Fetching {item} details")
                     lst_item_detail = self.MASIS_item_detail_query_item(item)
                     lst_result_items_detail.append([item] +  lst_item_detail)
-                    fn_log(f"{self._index}:Fetching {item} succeeded, {int_finished_count} of {int_total_lots} finished!!")
+                    fn_log(f"{self._index}: Fetching {item} succeeded, {int_finished_count} of {int_total_lots} finished!!")
                 except UnexpectedAlertPresentException:
                     fn_log(f"{self._index}:{item} doesn't exist. {int_finished_count} of {int_total_lots} queried.")
                     continue
             if len(lst_result_items_detail) == 0:
-                fn_log(f"{self._index}:items has no data")
+                fn_log(f"{self._index}: items has no data")
                 return
             fn_log(f"{self._index}:{len(lst_result_items_detail)} items data fetched")
             with DatabaseManager(DB_PATH) as db:
@@ -620,14 +677,14 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             # df.to_excel(f'{STR_DOWNLOADS_TIMESTAMP_FOLDER_PATH}\\item_detail/{STR_DATESTAMP}_items.xlsx', index=False)
             pass
     def EPIS_contract_batch() -> dict[str, any]:
-        def EPIS_contract_batch_handler(self, source:list[str], **kwargs) -> None:
+        def EPIS_contract_batch_handler(self, source: list[str], **kwargs) -> None:
             int_total = len(source)
             int_finished_count = 0
             for contract in source:
                 dict_contract_batches = None
                 int_finished_count += 1
                 try:
-                    fn_log(f"{self._index}:Start fetching {contract} batch.")
+                    fn_log(f"{self._index}: Start fetching {contract} batch.")
                     dict_contract_batches = self._EPIS_contract_batch_query_contract(contract)
                 except TimeoutException:
                     fn_log(f"{self._index}:{contract} has no data. {int_finished_count} of {int_total} finished")
@@ -640,9 +697,9 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 # Save Contract Batch
                 self._EPIS_contract_batch_save_db(dict_contract_batches)
                 fn_log(f"{self._index}:{contract} batches info saved!! {int_finished_count} of {int_total} finished")
-            fn_log(f"{self._index}:contract batches finished!")
+            fn_log(f"{self._index}: contract batches finished!")
             return
-        def _EPIS_contract_batch_query_contract(self, contract:str):
+        def _EPIS_contract_batch_query_contract(self, contract: str):
             BASE_URL = 'https://epis.cht.com.tw/epis100/Pages/GContract/_Menu.aspx?f=G_ContractMenu&cid='
             self.get(BASE_URL + contract)
             try:
@@ -653,16 +710,16 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 lst_batches = [batch.split()[1] for batch in _lst_batches]
                 # Extract batch details
                 dic_batches_data = {
-                    'contract' : contract,
-                    'temp_batch' : "",
-                    'data' : {
-                        'info' : [],
-                        '點收單' : [],
-                        '收料單' : [],
-                        '請款單' : []
+                    'contract': contract,
+                    'temp_batch': "",
+                    'data': {
+                        'info': [],
+                        '點收單': [],
+                        '收料單': [],
+                        '請款單': []
                     },
-                    'check_currency' : self._try_currency(),
-                    'postfix' : '外幣' if self._try_currency() else '一般',
+                    'check_currency': self._try_currency(),
+                    'postfix': '外幣' if self._try_currency() else '一般',
                 }
                 int_total_batches, int_fetched_batch = len(lst_batches), 0
                 for batch in lst_batches:
@@ -673,7 +730,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 return dic_batches_data
             except TimeoutException:
                 raise TimeoutException
-        def _EPIS_contract_batch_query_batch(self, dic_batches_data:dict) -> None:
+        def _EPIS_contract_batch_query_batch(self, dic_batches_data: dict) -> None:
             _table, S_mark, _物品點收單_html, _收料單_html, _請款單_html, _batch_info_html = None, None, None, None, None, None
             contract, batch = dic_batches_data['contract'], dic_batches_data['temp_batch']
             BATCH_BASE_URL = f"https://epis.cht.com.tw/epis100/Pages/GContract/_Menu.aspx?f=G_PerformMenu&cid={contract}&pid={batch}"
@@ -716,7 +773,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             str_請款單 = ','.join(re.findall(r'<span>(\w{8})</span>',_請款單_html))
             if str_請款單:
                 data['請款單'] += self._EPIS_contract_batch_extract_lists(_請款單_html, contract, batch)
-        def _EPIS_contract_batch_extract_batch_info(_self, html:str, check_currency) -> list:
+        def _EPIS_contract_batch_extract_batch_info(_self, html: str, check_currency) -> list:
             # basic info
             _html = re.sub(r'[\n,元]', '', html)
             if isinstance(check_currency, str) and bool(check_currency):
@@ -733,7 +790,7 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 for item in _result
             )
             return list(converted_result)
-        def _EPIS_contract_batch_extract_lists(_self, html:str, contract:str, batch:str) -> list[list[str]]:
+        def _EPIS_contract_batch_extract_lists(_self, html: str, contract: str, batch: str) -> list[list[str]]:
             a = re.sub(r'[\n\t]|<thead>.*?</thead>|<tfoot>.*?</tfoot>|<div.*?>|</div>|元', '', html, flags=re.DOTALL)
             b = re.sub(r'<tbody>|<tr.*?>','[',a)
             c = re.sub(r'</tbody>|</tr>',']',b)
@@ -746,14 +803,14 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
             lst_inserted_batch = [[contract] + [batch] + sublist for sublist in i]
             return lst_inserted_batch
         _dic_EPIS_contract_batch_db_names = {
-            '一般' : ['EPIS_contract_batch', ['id', '契約編號', '批次', '約定履約日期', '履約日期', '"履約金額(含稅)"', '履約明細金額總計']],
+            '一般': ['EPIS_contract_batch', ['id', '契約編號', '批次', '約定履約日期', '履約日期', '"履約金額(含稅)"', '履約明細金額總計']],
             '外幣': ['EPIS_contract_batch', ['id', '契約編號', '批次', '約定履約日期', '履約日期', '"履約金額(含稅)"', '進口匯率', '匯率日期', '履約明細金額總計', '器材款FCA', '交貨總金額', '成本分析表總價', '換算比例', '幣別']],
-            '類型有誤' : None,
-            '點收單' : ['EPIS_contract_batch_Pick', ['契約編號', '批次', '點收單號', '代建物品增加單', '收貨單位', '點收員工']],
-            '收料單' : ['EPIS_contract_batch_RS2901RA4L', ['契約編號', '批次'',' '庫號', '庫名', '收料單號', '到料日期']],
-            '請款單' : ['EPIS_contract_batch_RSapay', ['契約編號', '批次', '往請款作業', '請款單號', '類別', '狀態']]
+            '類型有誤': None,
+            '點收單': ['EPIS_contract_batch_Pick', ['契約編號', '批次', '點收單號', '代建物品增加單', '收貨單位', '點收員工']],
+            '收料單': ['EPIS_contract_batch_RS2901RA4L', ['契約編號', '批次'',' '庫號', '庫名', '收料單號', '到料日期']],
+            '請款單': ['EPIS_contract_batch_RSapay', ['契約編號', '批次', '往請款作業', '請款單號', '類別', '狀態']]
         }
-        def  _EPIS_contract_batch_save_db(self, dict_contract_batches:dict) -> None:
+        def  _EPIS_contract_batch_save_db(self, dict_contract_batches: dict) -> None:
             data, postfix, contract = dict_contract_batches['data'], dict_contract_batches['postfix'], dict_contract_batches['contract']
             for key, value in data.items():
                 if value:
@@ -770,17 +827,18 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                     db.execute_query(f"DELETE FROM {tablename} WHERE 契約編號 = '{contract}'")
                     # Iterate over the list and execute the query for each record
                     db.execute_many(insert_replace_sql , value)
-                    fn_log(f"{self._index}:contract batches saved to db {tablename}")
+                    fn_log(f"{self._index}: contract batches saved to db {tablename}")
         return vars()
     def sharepoint() -> dict[str, any]:
-        def sharepoint_check_online(self, source:CsMSGReport, **kwargs) ->bool:
+        _sharepoint_base_url = 'https://cht365.sharepoint.com/sites/msteams_e919c5/Shared Documents/General/存控/0_DB/'
+        def sharepoint_check_online(self, source: CsMSGReport, **kwargs) ->bool:
             self.get(f"{self._sharepoint_base_url}{source.name}/")
             try:
                 self._wait_element(By.XPATH, f"//button[contains(text(), '{source.new_name}')]",2)
                 return True
             except:
                 return False
-        def sharepoint_upload(self, source:CsMSGReport, index:int = 0) -> str:
+        def sharepoint_upload(self, source: CsMSGReport, index: int = 0) -> str:
             try:
                 # Clicking buttons
                 self.find_element(By.CSS_SELECTOR, "button[name='上傳']").click()
@@ -795,65 +853,81 @@ def _store_crawlers_components() -> dict[str, dict[str, Any]]:
                 return "succeeded"
             except Exception as e:
                 return f"failed with {e}"
-        _sharepoint_base_url = 'https://cht365.sharepoint.com/sites/msteams_e919c5/Shared Documents/General/存控/0_DB/'
-        def __init__(self) -> None:
+        def __init__component(self) -> None:
             self.get(self._sharepoint_base_url)
             self._wait_element(By.XPATH, '//span[text()="供三採購駐點"]')
         return vars()
     def google() -> dict[str, any]:
-        def __init__(self, *args, **kwargs):
-            print('in google')
-            print(args)
-            print(kwargs)
+        def google_handler(self):
+            self.get('https://google.com')
+        def __init__component(self, *args, **kwargs):
             self.get('https://google.com')
         return vars()
+    def _loader_init_remove() -> dict[str, any]:
+        def __init__loader(self, task) -> None:
+            if task not in ['sharepoint', 'google']: self.login_cht()
+        def __remove__loader(self, task) -> None:
+            pass
+        return vars()
     return {key: func() for key, func in vars().items()}
-_crawlers_components = _store_crawlers_components()
-def _store_loader_components() -> dict[str, any]:
-    def _load_components(self, *args, **kwargs) -> None:
-        self._loaded_components = []
+
+class CsLoaderComponent:
+    def __init__(self, *args, loadable_components: dict):
+        self._loadable_components = loadable_components
+        self._loaded_components = set()
+        if args: self.load_components(*args)
+    def load_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._crawlers_components.keys())
+            args = set(self._loadable_components) - {'_loader_init_remove'}
         for task in args:
             if task in self._loaded_components:
                 fn_log(f"{task} has already been loaded so skip")
                 continue
-            if task in list(self._crawlers_components.keys()) + ['ALL']:
-                for key, value in self._crawlers_components[task].items():
-                    if key == '__init__':
-                        value(self)
-                    else:
-                        setattr(self, key, MethodType(value, self) if callable(value) else value)
+            if task in set(self._loadable_components) - {'_loader_init_remove'}:
+                for key, value in self._loadable_components[task].items():
+                    match key:
+                        case '__init__component':
+                            MethodType(value, self)()
+                        case '__remove__component':
+                            pass
+                        case _:
+                            setattr(self, key, MethodType(value, self) if callable(value) else value)
             else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
-            self._loaded_components += [task]
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._loadable_components.keys())} or 'ALL' ")
+            MethodType(self._loadable_components['_loader_init_remove']['__init__loader'], self)(task)
+            self._loaded_components.add(task)
             fn_log(f"{task} loaded successfully")
         return None
-    def _remove_components(self, *args, **kwargs) -> None:
+    def remove_components(self, *args) -> None:
         if 'ALL' in args:
-            args = list(self._crawlers_components.keys())
+            args = set(self._loadable_components) - {'_loader_init_remove'}
         for task in args:
             if task in self._loaded_components:
-                for key in self._crawlers_components[task].keys():
-                    if key == '__init__':
-                        continue
-                    if hasattr(self, key):
-                        delattr(self, key)
+                for key,value in self._loadable_components[task].items():
+                    match key:
+                        case '__init__component':
+                            pass
+                        case '__remove__component':
+                            MethodType(value, self)()
+                        case _:
+                            if hasattr(self, key): delattr(self, key)
+                MethodType(self._loadable_components['_loader_init_remove']['__remove__loader'], self)(task)
                 self._loaded_components.remove(task)
                 fn_log(f"{task} removed successfully")
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
         return None
-    return vars()
-_loader_components = _store_loader_components()
-def _store_common_crawlers_components() -> dict[str, any]:
+
+class CsChtCrawlerComponent:
     def login_cht(self) -> object:
-        OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
-        self.get(OTP_LOGIN_URL)
-        self._wait_element(By.ID, 'orientation')
-        self.switch_to.window(self.window_handles[-1])
-        self.close()
-        self.switch_to.window(self.window_handles[0])
+        if not self._login_cht:
+            OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
+            self.get(OTP_LOGIN_URL)
+            self._wait_element(By.ID, 'orientation')
+            self.switch_to.window(self.window_handles[-1])
+            self.close()
+            self.switch_to.window(self.window_handles[0])
+            self._login_cht = True
         return self
     def _try_currency(self):
         try:
@@ -865,213 +939,170 @@ def _store_common_crawlers_components() -> dict[str, any]:
             return 'US\\$'
         except Exception:
             return False
-    def __init__(self, *args, **kwargs) -> None:
-        default = {
-            'index' : 0,
-            'crawlers_components' : _crawlers_components
-        }
-        for key, value in (default|kwargs).items():
-            setattr(self, '_' + key, value)
-        self._load_components(*args)
-        if 'sharepoint' not in args or 'google' not in args:self.login_cht()
-    return vars()
-_common_crawlers_components = _store_common_crawlers_components()
-
-
-# Procedures
-class CsMyDriver(webdriver.Edge):
-    def _select_change_value(self, By_locator:str, locator:str, new_value:str) -> None:
-        _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
-        _select_element = Select(_select_element)  # Create a Select instance
-        _select_element.select_by_value(new_value)
-    def _input_send_keys(self, By_locator:str, locator:str, new_value:str) -> None:
-        _input_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
-        _input_element.clear()
-        _input_element.send_keys(new_value)
-    def _wait_element(self, By_locator:str, locator:str, time:int = 1000):
+    def _try_extract_th_next_element_value_by_text(self, str_text:str, error_return = "") -> str:
         try:
-            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
-        except UnexpectedAlertPresentException:
+            element = self.find_element(By.XPATH,  f"//th[contains(text(), '{str_text}')]")
             try:
-                self.switch_to.alert.accept()
-            except NoAlertPresentException:
-                pass
-            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
-    def _try_extract_element_value(self, By_locator:str, locator:str, error_return = "") -> str:
-        try:
-            element = self.find_element(By_locator, locator)
-            match element.tag_name:
-                case 'th':
-                    return element.find_element(By.XPATH, 'following-sibling::*[1]').text
-                case 'input' | 'textarea':
-                    if element.get_attribute('type') == 'checkbox':
-                        return element.get_attribute('checked')
-                    return element.get_attribute('value')
-                case 'select':
-                    return Select(element).first_selected_option.text
-                case _:
-                    return element.text
+                target_element = element.find_element(By.XPATH, 'following-sibling::*[1]/*[1]/*[1]')
+                if target_element.tag_name == 'input': return self._try_extract_element_value(target_element)
+                else: raise NoSuchElementException
+            except NoSuchElementException: 
+                target_element = element.find_element(By.XPATH, 'following-sibling::*[1]/*[1]')
+                return self._try_extract_element_value(target_element)
         except NoSuchElementException:
             return error_return
     def __init__(self):
-        import logging
-        # Suppress selenium and webdriver_manager logs
-        logging.getLogger('selenium').setLevel(logging.WARNING)
-        logging.getLogger('urllib3').setLevel(logging.WARNING)
-        logging.getLogger('webdriver_manager').setLevel(logging.WARNING)
-        edge_bin = './bin/msedgedriver.exe'
-        port = 4444
-        service_args=[
-                    #   '--log-level=ALL',
-                    #   '--append-log',
-                    #   '--readable-timestamp',
-                    '--disable-build-check',
-                    ]
-        service = Service(executable_path=edge_bin, service_args=service_args)
-        options = Options()
-        options.add_argument('--disable-notifications')
-        options.add_argument('--inprivate')
-        options.add_argument("--disable-notifications")
-        options.add_argument("--log-level=3")
-        super().__init__(service=service, options=options)
-        self.int_main_window_handle = self.current_window_handle
-
-class CsDriverCrawler(CsMyDriver):
-    def __init__(self, *args, basic_components=(_loader_components | _common_crawlers_components), **kwargs):
-        super().__init__()
-        for key, value in basic_components.items():
-            if key == '__init__':
-                value(self , *args, **kwargs)
-            else:
-                setattr(self, key, MethodType(value, self) if callable(value) else value)
-        return
-    def __getattr__(self, name):
-        raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
-
-class CsMultiCrawlersManager(CsMyClass):
-    def __init__(self, *args, config={}, **kwargs): #threads=1 components=['MSG'] dic_drivers={} dic_sources={}
-        print(f"args:{args}")
-        print(f"config:{config}")
-        print(f"kwargs:{kwargs}")
-        default_config = {'threads':1, 'instances':{}, 'sources':{}, 'subclass':CsDriverCrawler, 'crawlers_components':_crawlers_components}
-        for key, value in default_config.items():
-            setattr(self, '_' + key, config.get(key, value))
-        if args:self.args = list(args)
-        if kwargs:self.kwargs = kwargs
+        self._login_cht = False
+class CsMultiSeed:
+    def __init__(self, index):
+        self._index = index
+    def _close_instance(self):
+        self.close() # depends on the instance
+class CsMultiManager:
+    def __init__(self, *args, threads, subclass, **kwargs) -> None: 
+        for key, value in {'instances':{}, 'sources':{}, 'threads': 0, 'subclass': subclass, 'args': set(args), 'kwargs': kwargs}.items():
+            setattr(self, '_' + key, value)
         # init instances
-        if self._threads > 0:self._init_instances(*args, crawlers_components = self._crawlers_components)
-        # load components for crawlers
-        self._loaded_instances_components=[]
-        if args:self._load_instances_components(*args)
-    def __getattr__(self, name):
-        raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
-    def _load_instances_components(self, *args, threads=None) -> None:
-        if 'ALL' in args:
-            args = list(self._crawlers_components.keys())
-        for task in args:
-            if task in self._loaded_instances_components:
-                fn_log(f"{task} has already been loaded so skip")
-                continue
-            if task in list(self._crawlers_components.keys()) + ['ALL']:
-                # load component for instances
-                self._call_instances(handler='_load_components')(task)
-                # set handler entrance for multi_manager
-                for handler in self._crawlers_components[task].keys():
-                    if not task.startswith("_"):
-                        setattr(self, handler, self._call_instances(handler=handler, threads=threads))
-            else:
-                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {list(self._crawlers_components.keys())} or 'ALL' ")
-            self._loaded_instances_components += [task]
-            fn_log(f"{task} entry loaded successfully")
-    def _remove_instances_components(self, *args) -> None:
-        _args = self._loaded_instances_components.copy() if 'ALL' in args else args
-        for task in _args:
-            if task in self._loaded_instances_components:
-                # remove component for instances
-                self._call_instances('_remove_components')(task)
-                for key in self._crawlers_components[task].keys():
-                    if 'handler' in key and hasattr(self, key):
-                        delattr(self, key)
-                self._loaded_instances_components.remove(task)
-                fn_log(f"{task} entry removed successfully")
-            else:
-                raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
-    def _call_instances(self, handler:str, threads:int=None):
-        if self._threads==0:raise ValueError('current there is no thread')
-        threads = threads if threads and threads <= self._threads else self._threads
-        def _def_wrapper(*args, source:any=None, **kwargs):
+        self.threads = threads
+    def _init_instances(self) -> None:
+        def _init_instance(*args, index, **kwargs):
+            if index in self._instances:
+                fn_log(f"{index} instance already exists so pass")
+                return
+            fn_log(f"start initializing {index} instance")
+            self._instances.update({index: self._subclass(*args, index=index, **kwargs)})
+        multithreading(
+            source = None,
+            call_def = _init_instance,
+            threads = self._threads,
+            args = self._args,
+            kwargs = self._kwargs
+        )
+    def _call_instances(self, handler:str, threads:int=None) -> callable:
+        if threads is None: threads = self._threads 
+        if threads <= 0: raise ValueError('threads must be positive integer( >0 )')
+        def _def_wrapper(*args, source:any=None, threads:int=threads, **kwargs):
+            match threads:
+                case _ if threads <= 0: raise ValueError('threads must be positive integer( >0 )')
+                case _ if threads > self._threads: self.threads = threads
+                case _: pass
             # split source into self._sources
             if isinstance(source,(list, tuple, dict)):
-                self._sources = {}
+                self._sources.clear()
                 multithreading(
                     source = source,
-                    call_def = lambda source, index:self._sources.update({index: source}),
+                    call_def = lambda source, index: self._sources.update({index: source}),
                     threads = threads,
                 )
             # execute instances def
             multithreading(
                 source = source,
-                call_def = lambda *args, index, **kwargs:getattr(self._instances[index], handler)(*args, **kwargs),
+                call_def = lambda *args, index, **kwargs: getattr(self._instances[index], handler)(*args, **kwargs),
                 threads = threads,
                 args = args,
                 kwargs = kwargs
             )
         return _def_wrapper
     @property # Getter
-    def threads(self):
+    def threads(self) -> int:
         return self._threads
     @threads.setter # Setter
-    def threads(self, threads:int):
-        if not isinstance(threads, int) or threads<0:raise TypeError(f"threads must > 0")
+    def threads(self, threads: int) -> None:
+        if not isinstance(threads, int) or threads < 0: raise TypeError(f"threads must > 0")
         match threads:
             case self._threads:
                 fn_log(f"current threads {threads} unchanged")
             case _ if threads > self._threads:
-                self._init_instances(*self._loaded_instances_components, threads = threads, crawlers_components = self._crawlers_components)
+                self._threads = threads
+                self._init_instances()
             case _ if threads < self._threads:
                 for i in range(threads, self._threads):
-                    if hasattr(self._instances[i],'close'):self._instances[i].close()
+                    self._instances[i]._close_instance() 
                     self._instances.pop(i)
-        self._threads = threads
-    def _init_instances(self, *args, threads:int=None, **kwargs):
-        def _init_instance(*args, index, **kwargs):
-            if index in self._instances:
-                return
-            self._instances.update({index:self._subclass(*args, index=index, **kwargs)})
-        multithreading(
-            source = None,
-            call_def = _init_instance,
-            threads = self._threads if threads is None else threads,
-            args = args,
-            kwargs = kwargs
-        )
-    def crawling_main(self, source, task, threads=None, **kwargs):
+                self._threads = threads
+class CsMultiLoaderEntry:
+    def __init__(self):
+        if self.threads == 0: self.threads = 1
+        self._instances_loadable_components = self._instances[0]._loadable_components
+        for task in self._args:
+            for handler in self._instances_loadable_components[task]:
+                if not task.startswith("_"):
+                    setattr(self, handler, self._call_instances(handler=handler))
+    def load_instances_components(self, *args, threads:int=None) -> None:
+        if 'ALL' in args:
+            args = set(self._instances_loadable_components)
+        for task in args:
+            if task in self._args:
+                fn_log(f"{task} has already been loaded so skip")
+                continue
+            if task in self._instances_loadable_components:
+                # load component to instances
+                self._call_instances(handler='load_components')(task)
+                # set handler entrance for multi_manager
+                for handler in self._instances_loadable_components[task]:
+                    if not task.startswith("_"):
+                        setattr(self, handler, self._call_instances(handler=handler, threads=threads))
+            else:
+                raise AttributeError(f"'{task}' is not a valid task for {self.__class__.__name__}, try {set(self._instances_loadable_components)} or 'ALL' ")
+            self._args.add(task)
+            fn_log(f"{task} entry loaded successfully")
+    def remove_instances_components(self, *args) -> None:
+        if 'ALL' in args: args = set(self._args)
+        for task in args:
+            if task in self._args:
+                # remove component for instances
+                self._call_instances('remove_components')(task)
+                for key in self._instances_loadable_components[task]:
+                    if 'handler' in key and hasattr(self, key):
+                        delattr(self, key)
+                self._args.remove(task)
+                fn_log(f"{task} entry removed successfully")
+            else:
+                raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
+    def crawling_main(self, task, source=None, threads=None, **kwargs):
         fn_log(f"Total {task} count : {len(source)}")
         
-        # change threads if needed
-        if threads and threads > self.threads: self.threads = threads
-        
         # load task
-        if task not in self._loaded_instances_components : self._load_instances_components(task, threads=threads)
+        if task not in self._args: self.load_instances_components(task, threads=threads)
         
         # execute
         getattr(self, task + '_handler')(source = source, **kwargs)
-def composer_factory(*args, cs=None, basic_components, main_components, super_args=[], super_kwargs={}, **kwargs):
-    match cs:
-        case None:
-            class _():
-                pass
-        case _:
-            class _(cs):
-                pass
-    def __init__(self, *args, basic_components, main_components, **kwargs):
-        super().__init__(*super_args, **super_kwargs)
-        for key, value in basic_components.items():
-            if key == '__init__':
-                value(self , *args, main_components=main_components, **kwargs)
-            else:
-                setattr(self, key, MethodType(value, self) if callable(value) else value)
-        return
-    _.__init__ = __init__
-    return _(*args, **kwargs)
+# class factory
+def cs_factory(dic_cs: dict):
+    # create class skelton
+    class _Cs(*dic_cs):
+        __slots__ = {slot for base in dic_cs if hasattr(base, '__slots__') for slot in getattr(base, '__slots__')}
+        def __init__(self, *args, **kwargs):
+        # set attributes
+            for Cs, config in dic_cs.items():
+                if config is None: continue
+                default_args, default_kwargs = config.get('default_args', set()), config.get('default_kwargs', {})
+                _args = default_args - {'args', 'kwargs'} | set(args) if 'args' in default_args else default_args - {'kwargs'}
+                _kwargs = default_kwargs | kwargs if 'kwargs' in default_args else {key: kwargs.get(key, value) for key, value in default_kwargs.items()}
+                Cs.__init__(self, *_args, **_kwargs)
+    return _Cs
 
+dic_cs_cht_crawler_config = {
+    webdriver.Edge: None,
+    CsBasicComponent: None,
+    CsMyDriveComponent: {},
+    CsChtCrawlerComponent: {},
+    CsLoaderComponent: {
+        'default_args': {'args'},
+        'default_kwargs': {'loadable_components': _spit_cht_crawlers_loadable_components()}
+    },
+    CsMultiSeed: {
+        'default_kwargs':{'index': 0}        
+    },
+}
+
+dic_cs_cht_multi_crawler_config = {
+    CsMultiManager: {
+        'default_args': {'args', 'kwargs'},
+        'default_kwargs': {
+            'threads': 1,
+            'subclass': cs_factory(dic_cs_cht_crawler_config),
+        }
+    },
+    CsMultiLoaderEntry: {}
+}
