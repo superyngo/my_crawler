@@ -1,0 +1,94 @@
+{
+   "checksum": "05d729236c1aa45c752837f366a4011d",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13251967034013293",
+            "date_last_used": "0",
+            "guid": "9f28dd91-360c-45ae-a596-dd7cb2fb852d",
+            "id": "6",
+            "name": "MSG報表入口網站",
+            "show_icon": false,
+            "source": "import_fre",
+            "type": "url",
+            "url": "https://msgrpt.cht.com.tw/RsView12/RsPortal.aspx",
+            "visit_count": 0
+         }, {
+            "date_added": "13251800070708506",
+            "date_last_used": "0",
+            "guid": "febf445c-4a33-41f5-928f-ce9a2eaddce6",
+            "id": "7",
+            "name": "eip ldap",
+            "show_icon": false,
+            "source": "import_fre",
+            "type": "url",
+            "url": "http://eip.cht.com.tw/",
+            "visit_count": 0
+         }, {
+            "date_added": "13252139680005702",
+            "date_last_used": "0",
+            "guid": "632c10bc-1e55-4276-a5d1-69469dff5a3c",
+            "id": "8",
+            "name": "階層式瀏覽",
+            "show_icon": false,
+            "source": "import_fre",
+            "type": "url",
+            "url": "http://ssodspro.cht.com.tw/new_chtds/chtds-browse.html",
+            "visit_count": 0
+         } ],
+         "date_added": "13373363803099737",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "我的最愛列",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [ {
+            "date_added": "13262236821217302",
+            "date_last_used": "0",
+            "guid": "cc4b2e83-40da-41c3-9569-e63b19108e09",
+            "id": "9",
+            "name": "專案廠商契約查詢",
+            "show_icon": false,
+            "source": "import_fre",
+            "type": "url",
+            "url": "http://bcrm.cht.com.tw/sales/pmcr/contract/QueryCase_Detail.php?ap=04_22_01&SerialNo=E4040-038214-2021-01-19-07-00-00&f1=QURY&Recid=&ActType=&sc_serial_no=E4041-840424-2020-11-06-11-07-24",
+            "visit_count": 0
+         }, {
+            "date_added": "13139697452000000",
+            "date_last_used": "0",
+            "guid": "24a298fc-8952-4b0b-8b38-70b295feb11b",
+            "id": "10",
+            "name": "The NeoSmart Files",
+            "show_icon": false,
+            "source": "import_fre",
+            "type": "url",
+            "url": "http://neosmart.net/blog/feed/",
+            "visit_count": 0
+         } ],
+         "date_added": "13373363803099741",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "其他 [我的最愛]",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13373363803099742",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "行動裝置的 [我的最愛]",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}

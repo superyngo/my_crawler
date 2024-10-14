@@ -68,6 +68,7 @@ def main():
         getattr(cht_crawler, task + '_handler')(source if source else configs.get(task))
   fn_log("Jobs done!!")
   cht_crawler.close()
+  cht_crawler.quit()
   
 if __name__ == "__main__":
     main()

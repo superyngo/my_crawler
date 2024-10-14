@@ -1,0 +1,166 @@
+[2024-10-14T07:17:31.068Z] [INFO] ========================================================================================================================
+[2024-10-14T07:17:31.068Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:17:31.068Z] [INFO] Telemetry session 3bc3c31f-79a0-4430-a9de-6d0651c0c0db.
+[2024-10-14T07:17:31.070Z] [INFO] Initializing cache (v1).
+[2024-10-14T07:17:31.097Z] [INFO] Registered UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 in the Azure public cloud.
+[2024-10-14T07:17:31.097Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:17:31.097Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:17:32.320Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:17:33.062Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:c7a19e4d-fe3a-4e8a-a890-2c18e6d477cc)
+[2024-10-14T07:17:33.095Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:17:33.095Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:17:34.062Z.
+[2024-10-14T07:19:43.680Z] [INFO] Shutting down.
+[2024-10-14T07:19:43.680Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:19:43.680Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:19:43.680Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T07:19:55.245Z] [INFO] ========================================================================================================================
+[2024-10-14T07:19:55.245Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:19:55.245Z] [INFO] Telemetry session 32c61555-8fd0-4f89-b294-5ee74c8576a4.
+[2024-10-14T07:19:55.253Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:19:55.253Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:19:55.253Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:19:55.254Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:19:55.254Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:19:56.357Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:19:56.988Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:8ee4129b-da4d-43c6-b214-d1cdcdcaee1d)
+[2024-10-14T07:19:56.993Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:19:56.993Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:19:57.988Z.
+[2024-10-14T07:25:17.558Z] [INFO] ========================================================================================================================
+[2024-10-14T07:25:17.558Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:25:17.559Z] [INFO] Telemetry session db896b92-e07f-4c93-affe-5b0462ecd503.
+[2024-10-14T07:25:17.560Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:25:17.560Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:25:17.560Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:25:17.560Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:25:17.560Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:25:18.596Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:25:19.207Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:e05f1168-4b64-4eb0-9f1a-d429f241d370)
+[2024-10-14T07:25:19.219Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:25:19.219Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:25:20.207Z.
+[2024-10-14T07:40:37.368Z] [INFO] Shutting down.
+[2024-10-14T07:40:37.369Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:40:37.369Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:40:37.369Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T07:41:45.861Z] [INFO] ========================================================================================================================
+[2024-10-14T07:41:45.861Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:41:45.862Z] [INFO] Telemetry session 78ff5f35-ffa3-4ac6-8e7f-4d459bf0a3ae.
+[2024-10-14T07:41:45.866Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:41:45.866Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:41:45.866Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:41:45.867Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:41:45.867Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:41:46.710Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:41:47.343Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:aecfdf3b-88d4-4162-89e5-a931d5e2441b)
+[2024-10-14T07:41:47.349Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:41:47.350Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:41:48.343Z.
+[2024-10-14T07:47:26.397Z] [INFO] Shutting down.
+[2024-10-14T07:47:26.398Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:47:26.398Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:47:26.398Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T07:47:32.711Z] [INFO] ========================================================================================================================
+[2024-10-14T07:47:32.711Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:47:32.711Z] [INFO] Telemetry session 7a37b9bf-bdd4-4635-8212-7e200be0e2a7.
+[2024-10-14T07:47:32.716Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:47:32.716Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:47:32.716Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:47:32.716Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:47:32.716Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:47:33.458Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:47:34.172Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:1a8adce7-567c-4b67-bf30-2d932cd3a40c)
+[2024-10-14T07:47:34.180Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:47:34.180Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:47:35.172Z.
+[2024-10-14T07:47:55.808Z] [INFO] Shutting down.
+[2024-10-14T07:47:55.812Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:47:55.812Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:47:55.813Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T07:48:12.789Z] [INFO] ========================================================================================================================
+[2024-10-14T07:48:12.789Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:48:12.789Z] [INFO] Telemetry session 363d9542-be03-419c-812f-3bf5054206f0.
+[2024-10-14T07:48:12.792Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:48:12.792Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:48:12.792Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:48:12.798Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:48:12.798Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:48:13.710Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:48:14.261Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:f0db3bb3-5201-4fc6-9ce9-cd2a296b904f)
+[2024-10-14T07:48:14.282Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:48:14.282Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:48:15.261Z.
+[2024-10-14T07:48:14.711Z] [INFO] Shutting down.
+[2024-10-14T07:48:14.712Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:48:14.712Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:48:14.713Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T07:52:29.525Z] [INFO] ========================================================================================================================
+[2024-10-14T07:52:29.525Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:52:29.525Z] [INFO] Telemetry session 68a9ebe6-3d0d-403d-9a86-4d98e1e6aab8.
+[2024-10-14T07:52:29.530Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:52:29.530Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:52:29.530Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:52:29.531Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:52:29.531Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:52:30.431Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:52:30.712Z] [INFO] Shutting down.
+[2024-10-14T07:52:30.712Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:52:58.422Z] [INFO] ========================================================================================================================
+[2024-10-14T07:52:58.422Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:52:58.422Z] [INFO] Telemetry session b1c386f7-d9a5-4b0b-bb63-746ab3fa8f06.
+[2024-10-14T07:52:58.429Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:52:58.429Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:52:58.429Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:52:58.429Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:52:58.429Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:52:59.182Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:52:59.854Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:6bdea305-d309-4f5a-a64e-890227bbdc98)
+[2024-10-14T07:52:59.858Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:52:59.858Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:53:00.854Z.
+[2024-10-14T07:53:09.439Z] [INFO] Shutting down.
+[2024-10-14T07:53:09.439Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:53:09.439Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:53:09.440Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T07:53:31.975Z] [INFO] ========================================================================================================================
+[2024-10-14T07:53:31.975Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:53:31.975Z] [INFO] Telemetry session 8aaad228-502b-4a30-bea9-57afbf648c21.
+[2024-10-14T07:53:31.980Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:53:31.980Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:53:31.980Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:53:31.980Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:53:31.980Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:53:32.917Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:53:33.286Z] [INFO] Shutting down.
+[2024-10-14T07:53:33.287Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:54:45.447Z] [INFO] ========================================================================================================================
+[2024-10-14T07:54:45.447Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:54:45.447Z] [INFO] Telemetry session 33b2ff26-aea8-49b2-8f2e-39094ece8837.
+[2024-10-14T07:54:45.455Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:54:45.455Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:54:45.455Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:54:45.455Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:54:45.455Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:54:46.312Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:54:46.817Z] [INFO] Shutting down.
+[2024-10-14T07:54:46.818Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:54:59.730Z] [INFO] ========================================================================================================================
+[2024-10-14T07:54:59.730Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T07:54:59.731Z] [INFO] Telemetry session 4e279fb6-74d8-4808-a8a0-86542a5173c0.
+[2024-10-14T07:54:59.735Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T07:54:59.735Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T07:54:59.735Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:54:59.735Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:54:59.735Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T07:55:00.669Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T07:55:01.455Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:468e8ec3-c43f-4f62-b8d7-8df2ac6a9795)
+[2024-10-14T07:55:01.462Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T07:55:01.462Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-14T19:55:02.455Z.
+[2024-10-14T07:55:58.885Z] [INFO] Shutting down.
+[2024-10-14T07:55:58.886Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T07:55:58.886Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T07:55:58.887Z] [INFO] Task scheduler has stopped, and all work has been canceled.
