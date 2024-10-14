@@ -315,6 +315,7 @@ def _spit_cht_crawlers_loadable_components() -> dict[str, dict[str, Any]]:
             _task_name = 'MASIS_InvQry'
             self.get(_BASE_URL)
             # main
+            fn_log(f"{self._index}: total {len(source)} warehouses inventory to be fetched")
             for txtWhno in source:     
                 lst_data = []   
                 fn_log(f"{self._index}: start fetching {txtWhno} inventory")
@@ -921,6 +922,7 @@ class CsLoaderComponent:
 class CsChtCrawlerComponent:
     def login_cht(self) -> object:
         if not self._login_cht:
+            fn_log('Please login to CHT')
             OTP_LOGIN_URL = 'https://am.cht.com.tw/NIASLogin/faces/CHTOTP?origin_url=https%3A%2F%2Feip.cht.com.tw%2Findex.jsp'
             self.get(OTP_LOGIN_URL)
             self._wait_element(By.ID, 'orientation')
