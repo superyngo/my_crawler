@@ -1,94 +1,67 @@
 from modules.bin import *
+import undetected_chromedriver as uc
 
-# def _spit_loadable_components() -> dict[str, dict[str, Any]]:
-#     def google_photo_uploader() -> dict[str, any]:
-#         def google_photo_uploader_handler(self, source:dict[str, list[str]]) -> None:
-#             for report in source:
-#                 # fetch
-#                 fn_log(f"{self._index}: Start fetching {report.prefix} {report.name} {report.postfix if report.postfix else ""}")
-#                 fn_log(f"{self._index}: Fetching {report.new_name} {self._MSG_query(report = report)}!!")
-#                 while not os.path.exists(report.old_path):
-#                     time.sleep(3)
-#                 # Rename and move
-#                 try:
-#                     os.rename(report.old_path, report.new_path)
-#                 except:
-#                     os.remove(report.old_path)
-#                     fn_log(f"{report.new_path} already exists")
-#                 # upload
-#                 if handle_check_onlineoledll Windows only: Creates ()
-#                         fn_log(f"{self._index}: Start uploading {report.new_path}, please wait for uploading.")
-#                         fn_log(f"{self._index}: Upload {report.new_path} {driver_sharepoint.sharepoint_upload(report)}!!")
-#     def _MSG_query(self, files:list[str]) -> None:
-#                 try:
-#                     # choose report
-#                     for id, value in report.set_report.items():
-#                         self._select_change_value(By.ID, id, value)
-#                     self._select_change_value(By.ID, 'ddlReport', report.name)
-#                     # wait for iframe
-#                     self.switch_to.frame(self._wait_element(By.ID, "iframe"))
-#                     # set report attribute
-#                     for id, value in report.set_report_attribute.items():
-#                         match value[0]:
-#                             case 'fn_driver_select_change_value':
-#                                 self._select_change_value(value[1], id, value[2])
-#                                 pass
-#                             case 'fn_driver_input_send_keys':
-#                                 self._input_send_keys(value[1], id, value[2])
-#                             case 'fn_driver_click':
-#                                 self._wait_element(value[1], id).click()
-#                             case _:
-#                                 print('Missing procedure definition')
-#                                 pass
-#                     # fetch report
-#                     self._wait_element(By.ID, "btnQuery").click()
-#                     # check if direct download
-#                     if report.show_report:
-#                         str_report_handle = self.window_handles[-1]
-#                         self.switch_to.window(str_report_handle)
-#                         # wait report
-#                         self._wait_element(By.XPATH, f"//div[contains(text(), {report.name})]")
-#                         time.sleep(1)
-#                         # download and wait
-#                         try:
-#                             self._wait_element(By.XPATH, f"//div[contains(text(), {report.name})]")
-#                             self.execute_script("$find('ReportViewer1').exportReport('EXCELOPENXML');")
-#                         except JavascriptException:
-#                             self._wait_element(By.XPATH, f"//div[contains(text(), {report.name})]")
-#                             time.sleep(5)
-#                             self.execute_script("$find('ReportViewer1').exportReport('EXCELOPENXML');")
-#                     # Wait for download
-#                     while not os.path.exists(report.old_path):
-#                         time.sleep(3)
-#                     time.sleep(3)
-#                     fn_log(f"{self._index}:{report.old_path} downloaded!!")
-#                     # switch to main
-#                     if report.show_report:
-#                         self.switch_to.window(str_report_handle)
-#                         self.close()
-#                         self.switch_to.window(self.int_main_window_handle)
-#                     # Switch back to the default content frame
-#                     self.switch_to.default_content()
-#                     return "succeeded"
-#                 except Exception as e:
-#                     return f"failed with {e}"
-#         return vars()
-#         def __init__component(self) -> None:
-#             print('MSG component equipped!!')
-#     def _loader_init_remove() -> dict[str, any]:
-#         def __init__loader(self, task) -> None:
-#             pass
-#         def __remove__loader(self, task) -> None:
-#             pass
-#         return vars()
-#     return {key: func() for key, func in vars().items()}
+class CsMyUCinit:
+  def __init__(self, user_data_dir):
+    user_data_dir = os.path.abspath(user_data_dir)
+    os.makedirs(user_data_dir, exist_ok=True)
+    # set Chrome options
+    options = uc.ChromeOptions()
+
+    # run Chrome in headless mode
+    options.headless = False
+
+    # add proxy to Chrome options
+    # options.add_argument(f"--proxy-server={proxy}")
+    options.unhandled_prompt_behavior = 'accept'
+    # options.add_argument('--inprivate')
+    # create a Chrome instance
+    super(type(self),self).__init__(
+        user_data_dir=user_data_dir,
+        options=options,
+        use_subprocess=False,
+    )
+    self.maximize_window()
+
+class CsMyUCGooglePhotoUploader:
+    def upload_to_google_photo(self, login_email, login_password, album_url, folder_path):
+        login_url = 'https://photos.google.com/login'
+        self.get(login_url)
+        files_path = self._list_mkv_files(folder_path)
+        try:
+            _wait_email_input = self._wait_element(By.XPATH, '//input[@type="text"]', 5)
+        except TimeoutException:
+            _wait_email_input = self._wait_element(By.XPATH, '//input[@type="email"]')
+            _wait_email_input.send_keys(login_email)
+            self._wait_element(By.XPATH, '//span[text()="Next" or text()="下一步" or text()="繼續"]').click()
+            _wait_password_input = self._wait_element(By.XPATH, '//input[@type="password"]')
+            _wait_password_input.send_keys(login_password)
+            self._wait_element(By.XPATH, '//span[text()="Next" or text()="下一步" or text()="繼續"]').click()
+            _wait_email_input = self._wait_element(By.XPATH, '//input[@type="text"]')
+        
+        self.get(album_url)
+        # Locate the input element by aria-label using XPath
+        _add_photo_click = self._wait_element(By.XPATH, '//button[@aria-label="新增相片"]').click()
+        # Interact with the input element
+        _upload_click = self._wait_element(By.XPATH, '//span[text()="從電腦中選取"]').click()
+        _wait_file_input = self.find_element(By.XPATH, '//input[@type="file"]')
+        _wait_file_input.send_keys(files_path)
+        self._wait_element(By.XPATH, f"//div[contains(text(), '你已備份')]")
+    def _list_mkv_files(self, folder_path) -> str:
+        # Get all .mkv files in the folder
+        mkv_files = [folder_path + file for file in os.listdir(folder_path) if file.endswith('.mkv')]
+        # Join the list of files into a single string separated by newline characters
+        mkv_files_str = '\n'.join(mkv_files)
+        return mkv_files_str
 
 dic_uploader_config = {
     CsBasicComponent: None,
-    webdriver.Edge: None,
-    CsMyDriveComponent: {
-      'default_args': {'./profiles/userA'}
-    }
+    uc.Chrome: None,
+    CsMyDriverComponent: None,
+    CsMyUCinit: {
+        'default_args': {'./profiles/userB'}
+    },
+    CsMyUCGooglePhotoUploader: None
     # CsLoaderComponent: {
     #     'default_args': {'args'},
     #     'default_kwargs': {'loadable_components': _spit_loadable_components()}
@@ -98,15 +71,5 @@ dic_uploader_config = {
     # },
 }
 
-# dic_multi_uploader_config = {
-#     CsMultiManager: {
-#         'default_args': {'args', 'kwargs'},
-#         'default_kwargs': {
-#             'threads': 1,
-#             'subclass': cs_factory(dic_uploader_config),
-#         }
-#     },
-#     CsMultiLoaderEntry: {}
-# }
 
-
+    # visit the test URL to check your proxy IP

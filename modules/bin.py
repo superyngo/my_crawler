@@ -4,8 +4,6 @@ import time, re, ast, os
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
-from selenium.webdriver.edge.service import Service
-from selenium.webdriver.edge.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -212,7 +210,7 @@ class CsBasicComponent:
     def __getattr__(self, name):
         raise AttributeError(f"'{self.__class__.__name__}' '{name}' was not set")
 
-class CsMyDriveComponent:
+class CsMyDriverComponent:
     def _select_change_value(self, By_locator: str, locator: str, new_value: str) -> None:
         _select_element = WebDriverWait(self, 20).until(EC.element_to_be_clickable((By_locator, locator)))
         _select_element = Select(_select_element)  # Create a Select instance
@@ -223,7 +221,7 @@ class CsMyDriveComponent:
         _input_element.send_keys(new_value)
     def _wait_element(self, By_locator: str, locator: str, time: int = 1000):
         try:
-            return WebDriverWait(self, time).until(EC.presence_of_element_located((By_locator, locator)))
+            return WebDriverWait(self, time).until(EC.element_to_be_clickable((By_locator, locator)))
         except UnexpectedAlertPresentException:
             try:
                 self.switch_to.alert.accept()
@@ -243,8 +241,12 @@ class CsMyDriveComponent:
                     return element.text
         except NoSuchElementException:
             return error_return
+
+class CsMyEdgeDriverInit:
     def __init__(self, user_data_dir):
         import logging
+        Service = webdriver.EdgeService
+        Options = webdriver.EdgeOptions
         # Suppress selenium and webdriver_manager logs
         logging.getLogger('selenium').setLevel(logging.WARNING)
         logging.getLogger('urllib3').setLevel(logging.WARNING)
