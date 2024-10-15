@@ -257,7 +257,6 @@ class CsMyDriveComponent:
         os.makedirs(user_data_dir, exist_ok=True)
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         edge_bin = './bin/msedgedriver.exe'
-        port = 4444
         service_args=[
                     #   '--log-level=ALL',
                     #   '--append-log',
@@ -267,8 +266,8 @@ class CsMyDriveComponent:
         service = Service(executable_path=edge_bin, service_args=service_args)
         options = Options()
         options.unhandled_prompt_behavior = 'accept'
-        # options.add_argument('--inprivate')
-        options.add_argument(f"user-data-dir={user_data_dir}")
+        options.add_argument('--inprivate')
+        # options.add_argument(f"user-data-dir={user_data_dir}")
         options.add_argument("--disable-notifications")
         options.add_argument("--log-level=3")
         super(type(self),self).__init__(service=service, options=options)
@@ -429,7 +428,7 @@ class CsMultiLoaderEntry:
             else:
                 raise AttributeError(f"'{task}' components is not loaded or component {task} doesn't exists")
     def crawling_main(self, task, source=None, threads=None, **kwargs):
-        fn_log(f"Total {task} count : {len(source)}")
+        fn_log(f"Start {task}, total source count : {len(source)}")
         
         # load task
         if task not in self._args: self.load_instances_components(task, threads=threads)

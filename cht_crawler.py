@@ -58,6 +58,7 @@ def main():
         'MASIS_InvQry': ['50503', '59511', '59512', '59521', '59531']
       }
     tasks = convert_string_to_dict(input(f"tasks:\n {"\n ".join(configs.keys())}\nor stop:"))
+    print(f"input tasks: {set(tasks)}")
     # config = tasks['config'] if 'config' in 
     for task, source in tasks.items():
       if task == 'stop': 

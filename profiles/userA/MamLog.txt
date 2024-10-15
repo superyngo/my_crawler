@@ -164,3 +164,20 @@ Azure public cloud
 [2024-10-14T07:55:58.886Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
 [2024-10-14T07:55:58.886Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
 [2024-10-14T07:55:58.887Z] [INFO] Task scheduler has stopped, and all work has been canceled.
+[2024-10-14T23:52:08.792Z] [INFO] ========================================================================================================================
+[2024-10-14T23:52:08.792Z] [INFO] MAM Client v2.0.779.0
+[2024-10-14T23:52:08.792Z] [INFO] Telemetry session b53a712b-351e-49f0-bc99-6a4a886cc173.
+[2024-10-14T23:52:08.805Z] [INFO] Restored UserID:3fb7aa7e-8356-4164-a15f-e235029850f3
+Azure public cloud
+[2024-10-14T23:52:08.805Z] [INFO] Reinitialized cache (v1).
+[2024-10-14T23:52:08.805Z] [INFO] Scheduler background thread starting for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T23:52:08.805Z] [INFO] Re-queuing pre-enrollment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T23:52:08.805Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run as soon as possible.
+[2024-10-14T23:52:16.389Z] [INFO] Resolved MAM Location Service address "https://mamservice.manage.microsoft.com/api/Locations" for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3.
+[2024-10-14T23:52:16.937Z] [ERROR] MAM Location Service request for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 failed with a status (404) indicating the tenant has not completed onboarding, or the user is not licensed for Intune. (client-request-id:84d603ea-1872-46b0-ab39-b3ac942f6ffd)
+[2024-10-14T23:52:16.949Z] [ERROR] Unable to retrieve or validate the MAM Service address during check for MAM policy assignment for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3; the operation will be reattempted at a later time.
+[2024-10-14T23:52:16.949Z] [INFO] Queuing pre-enrollment policy assignment check for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 to run at 2024-10-15T11:52:17.937Z.
+[2024-10-14T23:54:40.336Z] [INFO] Shutting down.
+[2024-10-14T23:54:40.338Z] [INFO] Stopping the task scheduler and canceling any outstanding work items...
+[2024-10-14T23:54:40.338Z] [INFO] Scheduler background thread for UserID:3fb7aa7e-8356-4164-a15f-e235029850f3 is exiting after completing the last task.
+[2024-10-14T23:54:40.338Z] [INFO] Task scheduler has stopped, and all work has been canceled.

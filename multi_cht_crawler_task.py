@@ -80,6 +80,7 @@ def main():
           'threads' : 1
       }}
     tasks = convert_string_to_dict(input(f"tasks:\n {"\n ".join(configs.keys())}\nor stop:"))
+    print(f"input tasks: {set(tasks)}")
     # config = tasks['config'] if 'config' in 
     for task, config in tasks.items():
       if task == 'stop': 
