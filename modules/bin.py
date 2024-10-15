@@ -11,6 +11,7 @@ from selenium.webdriver.support.select import Select
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException, TimeoutException, NoAlertPresentException, JavascriptException
 from typing import TypedDict, Any, Callable
 from types import MethodType
+import hashlib
 
 os.environ['HTTPS_PROXY'] = ''
 os.environ['HTTP_PROXY'] = ''
@@ -103,6 +104,16 @@ def convert_roc_to_western(roc_date: str = "") -> str:
     # Step 3: Combine Western year with the remaining part of the ROC date string
     western_date = western_year + cleaned_date[3:]
     return western_date
+
+def create_sha256_hash(data):
+    # Create a SHA-256 hash object
+    sha256_hash = hashlib.sha256()
+    
+    # Encode the input data to bytes (if it's a string) and update the hash object
+    sha256_hash.update(data.encode('utf-8'))
+    
+    # Get the hexadecimal representation of the hash
+    return sha256_hash.hexdigest()
 
 class DatabaseManager:
     def __init__(self, db_name):
@@ -451,3 +462,5 @@ def cs_factory(dic_cs: dict):
                 _kwargs = default_kwargs | kwargs if 'kwargs' in default_args else {key: kwargs.get(key, value) for key, value in default_kwargs.items()}
                 Cs.__init__(self, *_args, **_kwargs)
     return _Cs
+
+

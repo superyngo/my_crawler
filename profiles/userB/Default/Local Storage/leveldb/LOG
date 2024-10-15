@@ -1,3 +1,2 @@
-2024/10/15-15:35:26.718 5520 Reusing MANIFEST D:\Users\user\OneDrive - Chunghwa Telecom Co., Ltd\文件\Projects\Python\Crawler\profiles\userB\Default\Local Storage\leveldb/MANIFEST-000001
-2024/10/15-15:35:26.723 5520 Recovering log #3
-2024/10/15-15:35:26.747 5520 Reusing old log D:\Users\user\OneDrive - Chunghwa Telecom Co., Ltd\文件\Projects\Python\Crawler\profiles\userB\Default\Local Storage\leveldb/000003.log 
+2024/10/15-22:31:44.682 9d3c Creating DB D:\Users\super\OneDrive\文件\Project\0_Python\Crawler\profiles\userB\Default\Local Storage\leveldb since it was missing.
+2024/10/15-22:31:44.941 9d3c Reusing MANIFEST D:\Users\super\OneDrive\文件\Project\0_Python\Crawler\profiles\userB\Default\Local Storage\leveldb/MANIFEST-000001
