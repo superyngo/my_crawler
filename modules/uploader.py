@@ -6,7 +6,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 import json
 
-
+import base64
 
 class CsMyUCinit:
   def __init__(self, user_data_dir):
@@ -32,11 +32,21 @@ class CsMyUCinit:
 
 class CsMyUCGooglePhotoUploader:
     def upload_to_google_photo(self, dict_camera:dict[str, str]):
-        windows_product_key = self._get_windows_product_key()
-        product_key = self._get_uploader_product_key()
         for camera_name, folder_path in dict_camera.items():
-            hash = create_sha256_hash(windows_product_key + " " + product_key + " " + camera_name)
-            api_url="https://script.google.com/macros/s/AKfycbworTnCogGbaFH20g2dn98yDwSW5lkZKiwC6INgzXNEVB3xFj5bbmXZWY20lnL1CFejTg/exec"
+            hash = create_sha256_hash(self._windows_product_key + " " + self._uploader_product_key + " " + camera_name)
+            api_url='https://script.google.com/macros/s/AKfycbworTnCogGbaFH20g2dn98yDwSW5lkZKiwC6INgzXNEVB3xFj5bbmXZWY20lnL1CFejTg/exec'
+            encrypted_data = self._get_encrypted_data(hash, api_url)
+
+            # 2. Decrypt the encrypted data using the hash as the key
+            decrypted_json = self._decrypt_aes(encrypted_data, self._windows_product_key)
+
+            # 3. Convert the decrypted JSON string to a dictionary
+            result_dict = json.loads(decrypted_json)
+
+            # Output the result
+            print("Decrypted Data:", result_dict)
+
+
             login_email
             login_password
             album_url
@@ -69,7 +79,8 @@ class CsMyUCGooglePhotoUploader:
         # Join the list of files into a single string separated by newline characters
         mkv_files_str = '\n'.join(mkv_files)
         return mkv_files_str
-    def _get_windows_product_key(self):
+    @property
+    def _windows_product_key(self):
         import winreg
         import itertools
         # Open the registry key
@@ -82,7 +93,8 @@ class CsMyUCGooglePhotoUploader:
             return "Cannot find Windows product key in registry."
         except Exception as e:
             return f"Error: {e}"
-    def _get_uploader_product_key(self):
+    @property
+    def _uploader_product_key(self):
         import winreg
         # Open the registry key
         reg_key_path = r"SOFTWARE\ANYOUNG\GOOGLEPHOTOUPLOADR"
@@ -94,6 +106,40 @@ class CsMyUCGooglePhotoUploader:
             return "Cannot find uploader product key in registry."
         except Exception as e:
             return f"Error: {e}"
+    # Function to get encrypted data from API
+    def _get_encrypted_data(self, hash_value, api_url):
+        params = {'hash': hash_value}
+        response = requests.get(api_url, params=params)
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"API request failed with status code {response.status_code}")
+    # Function to decrypt AES-encrypted string
+    def _decrypt_aes(self, encrypted_data, key):
+        # Derive a 256-bit AES key from the hash (using SHA-256)
+        key = hashlib.sha256(key.encode()).digest()
+
+        # Decode the base64-encoded encrypted data
+        encrypted_data = base64.b64decode(encrypted_data)
+
+        # Extract the initialization vector (first 16 bytes)
+        iv = encrypted_data[:16]
+
+        # Extract the ciphertext
+        ciphertext = encrypted_data[16:]
+
+        # Create AES cipher object
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+
+        # Decrypt and unpad the ciphertext
+        decrypted_data = unpad(cipher.decrypt(ciphertext), AES.block_size)
+
+        # Convert bytes back to string
+        return decrypted_data.decode('utf-8')
+    # Convert decrypted JSON string to Python dictionary
+
+
 
 dic_uploader_config = {
     CsBasicComponent: None,
