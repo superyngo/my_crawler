@@ -831,7 +831,7 @@ class CsChtCrawlerComponent:
 dic_cs_cht_crawler_config = {
     webdriver.Edge: None,
     CsBasicComponent: None,
-    CsMyDriveComponent: None,
+    CsMyDriverComponent: None,
     CsMyEdgeDriverInit: {
         'default_args': {"./profiles/userA"}
     },

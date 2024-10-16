@@ -1,6 +1,0 @@
-2024/10/15-13:34:10.453 5210 Creating DB D:\Users\user\OneDrive - Chunghwa Telecom Co., Ltd\文件\Projects\Python\Crawler\profiles\userB\Default\WebStorage\3\IndexedDB\indexeddb.leveldb since it was missing.
-2024/10/15-13:34:10.649 5210 Reusing MANIFEST D:\Users\user\OneDrive - Chunghwa Telecom Co., Ltd\文件\Projects\Python\Crawler\profiles\userB\Default\WebStorage\3\IndexedDB\indexeddb.leveldb/MANIFEST-000001
-2024/10/15-13:34:13.106 40d4 Level-0 table #5: started
-2024/10/15-13:34:13.206 40d4 Level-0 table #5: 5769 bytes OK
-2024/10/15-13:34:13.243 40d4 Delete type=0 #3
-2024/10/15-13:34:13.245 1194 Manual compaction at level-0 from '\x00\x02\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x03\x00\x00\x00' @ 0 : 0; will stop at (end)
