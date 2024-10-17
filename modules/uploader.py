@@ -1,12 +1,11 @@
 from modules.bin import *
 import undetected_chromedriver as uc
 import requests
-import hashlib
+from base64 import b64decode
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
+from Crypto.Protocol.KDF import PBKDF2 
 import json
 
-import base64
 
 class CsMyUCinit:
   def __init__(self, user_data_dir):
@@ -31,48 +30,43 @@ class CsMyUCinit:
     self.maximize_window()
 
 class CsMyUCGooglePhotoUploader:
-    def upload_to_google_photo(self, dict_camera:dict[str, str]):
-        for camera_name, folder_path in dict_camera.items():
-            hash = create_sha256_hash(self._windows_product_key + " " + self._uploader_product_key + " " + camera_name)
-            api_url='https://script.google.com/macros/s/AKfycbworTnCogGbaFH20g2dn98yDwSW5lkZKiwC6INgzXNEVB3xFj5bbmXZWY20lnL1CFejTg/exec'
-            encrypted_data = self._get_encrypted_data(hash, api_url)
+    def google_uploader_handler(self, dict_camera:dict[str, str]) -> None:
+            for camera_name, folder_path in dict_camera.items():
+                hash_value = create_sha256_hash(self._windows_product_key + " " + self._uploader_product_key + " " + camera_name)
+                api_url='https://script.google.com/macros/s/AKfycbzTK3UoCq6Mq4eWxUlgUZHl1SETLTHTdtD8pymEfBUQk2OHdFUhWKojIQtasXqMVzRQaw/exec'
+                encrypted_data = self._get_encrypted_data(hash_value, api_url)
 
-            # 2. Decrypt the encrypted data using the hash as the key
-            decrypted_json = self._decrypt_aes(encrypted_data, self._windows_product_key)
+                # 2. Decrypt the encrypted data using the hash as the key
+                decrypted_json = self._decrypt_aes(encrypted_data, self._windows_product_key)
 
-            # 3. Convert the decrypted JSON string to a dictionary
-            result_dict = json.loads(decrypted_json)
+                # 3. Convert the decrypted JSON string to a dictionary
+                result_dict = json.loads(decrypted_json) | {'folder_path':folder_path}
 
-            # Output the result
-            print("Decrypted Data:", result_dict)
-
-
-            login_email
-            login_password
-            album_url
+                fn_log(f"{camera_name} upload {self._upload_to_google_photo(**result_dict)}")
+    def _upload_to_google_photo(self, email:str, password:str, album:str, folder_path:str, **kwargs) -> str:
             login_url = 'https://photos.google.com/login'
             self.get(login_url)
-            files_path = self._list_mkv_files(folder_path)
             try:
                 _wait_email_input = self._wait_element(By.XPATH, '//input[@type="text"]', 5)
             except TimeoutException:
                 _wait_email_input = self._wait_element(By.XPATH, '//input[@type="email"]')
-                _wait_email_input.send_keys(login_email)
+                _wait_email_input.send_keys(email)
                 self._wait_element(By.XPATH, '//span[text()="Next" or text()="下一步" or text()="繼續"]').click()
                 _wait_password_input = self._wait_element(By.XPATH, '//input[@type="password"]')
-                _wait_password_input.send_keys(login_password)
+                _wait_password_input.send_keys(password)
                 self._wait_element(By.XPATH, '//span[text()="Next" or text()="下一步" or text()="繼續"]').click()
                 _wait_email_input = self._wait_element(By.XPATH, '//input[@type="text"]')
             
-            self.get(album_url)
+            self.get(album)
             # Locate the input element by aria-label using XPath
             _add_photo_click = self._wait_element(By.XPATH, '//button[@aria-label="新增相片"]').click()
             # Interact with the input element
             _upload_click = self._wait_element(By.XPATH, '//span[text()="從電腦中選取"]').click()
             _wait_file_input = self.find_element(By.XPATH, '//input[@type="file"]')
+            files_path = self._list_mkv_files(folder_path)
             _wait_file_input.send_keys(files_path)
             self._wait_element(By.XPATH, f"//div[contains(text(), '你已備份')]")
-            fn_log(f"{camera_name} upload finished")
+            return "finished"
     def _list_mkv_files(self, folder_path) -> str:
         # Get all .mkv files in the folder
         mkv_files = [folder_path + file for file in os.listdir(folder_path) if file.endswith('.mkv')]
@@ -116,30 +110,16 @@ class CsMyUCGooglePhotoUploader:
         else:
             raise Exception(f"API request failed with status code {response.status_code}")
     # Function to decrypt AES-encrypted string
-    def _decrypt_aes(self, encrypted_data, key):
-        # Derive a 256-bit AES key from the hash (using SHA-256)
-        key = hashlib.sha256(key.encode()).digest()
-
-        # Decode the base64-encoded encrypted data
-        encrypted_data = base64.b64decode(encrypted_data)
-
-        # Extract the initialization vector (first 16 bytes)
-        iv = encrypted_data[:16]
-
-        # Extract the ciphertext
-        ciphertext = encrypted_data[16:]
-
-        # Create AES cipher object
+    def _decrypt_aes(self, encrypted_data, password):
+        data = b64decode(encrypted_data[4:])
+        salt = encrypted_data[:4]
+        bytes = PBKDF2(password.encode("utf-8"), salt.encode("utf-8"), 48, 128)
+        iv = bytes[0:16]
+        key = bytes[16:48]
         cipher = AES.new(key, AES.MODE_CBC, iv)
-
-        # Decrypt and unpad the ciphertext
-        decrypted_data = unpad(cipher.decrypt(ciphertext), AES.block_size)
-
-        # Convert bytes back to string
-        return decrypted_data.decode('utf-8')
-    # Convert decrypted JSON string to Python dictionary
-
-
+        deciphered_byte = cipher.decrypt(data)
+        deciphered_text = deciphered_byte[:-deciphered_byte[-1]].decode("utf-8")
+        return deciphered_text
 
 dic_uploader_config = {
     CsBasicComponent: None,

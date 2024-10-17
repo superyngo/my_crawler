@@ -1,8 +1,0 @@
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:16:42.904 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:19:54.904 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:25:17.229 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:41:45.472 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:47:32.326 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:52:58.067 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 07:54:59.370 UTC"],
-["host/browser","browser-launched",["129.0.2792.89","23H2"],"2024-10-14 23:52:08.221 UTC"],
