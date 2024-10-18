@@ -8,9 +8,10 @@ import json
 
 
 class CsMyUCinit:
-  def __init__(self, user_data_dir):
-    user_data_dir = os.path.abspath(user_data_dir)
-    os.makedirs(user_data_dir, exist_ok=True)
+  def __init__(self, _user_data_dir, user_profile_name):
+    # print(_user_data_dir + '\\' + user_profile_name)
+    # user_data_dir = _user_data_dir + '\\' + user_profile_name
+    # os.makedirs(user_data_dir, exist_ok=True)
     # set Chrome options
     options = uc.ChromeOptions()
 
@@ -18,12 +19,21 @@ class CsMyUCinit:
     options.headless = False
 
     # add proxy to Chrome options
-    # options.add_argument(f"--proxy-server={proxy}")
     options.unhandled_prompt_behavior = 'accept'
     # options.add_argument('--inprivate')
+    # Headless mode (no GUI)
+    options.add_argument('--headless')  # Enable headless mode
+    options.add_argument('--disable-gpu')  # Disable GPU rendering
+    options.add_argument('--no-sandbox')  # Bypass OS security model
+    options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
+    latest_user_agent = requests.get('http://headers.scrapeops.io/v1/user-agents?api_key=5f0dd055-a569-430e-a964-e49d53548856').json()
+    options.add_argument(f"--user-agent={latest_user_agent['result'][0]}")
+
+    # Incognito mode
+    options.add_argument("--incognito")
     # create a Chrome instance
     super(type(self),self).__init__(
-        user_data_dir=user_data_dir,
+        # user_data_dir=user_data_dir,
         options=options,
         use_subprocess=False,
     )
@@ -51,17 +61,25 @@ class CsMyUCGooglePhotoUploader:
             except TimeoutException:
                 _wait_email_input = self._wait_element(By.XPATH, '//input[@type="email"]')
                 _wait_email_input.send_keys(email)
-                self._wait_element(By.XPATH, '//span[text()="Next" or text()="下一步" or text()="繼續"]').click()
+                print("email")
+                self.save_screenshot("email.png")
+                self._wait_element(By.XPATH, '//*[text()="Next" or text()="下一步" or text()="繼續"]').click()
+                print("下一步")
+                self.save_screenshot("下一步.png")
                 _wait_password_input = self._wait_element(By.XPATH, '//input[@type="password"]')
                 _wait_password_input.send_keys(password)
+                print("password")
+                self.save_screenshot("password.png")
                 self._wait_element(By.XPATH, '//span[text()="Next" or text()="下一步" or text()="繼續"]').click()
                 _wait_email_input = self._wait_element(By.XPATH, '//input[@type="text"]')
             
             self.get(album)
             # Locate the input element by aria-label using XPath
             _add_photo_click = self._wait_element(By.XPATH, '//button[@aria-label="新增相片"]').click()
+            print("新增相片")
             # Interact with the input element
             _upload_click = self._wait_element(By.XPATH, '//span[text()="從電腦中選取"]').click()
+            print("從電腦中選取")
             _wait_file_input = self.find_element(By.XPATH, '//input[@type="file"]')
             files_path = self._list_mkv_files(folder_path)
             _wait_file_input.send_keys(files_path)
@@ -126,7 +144,7 @@ dic_uploader_config = {
     uc.Chrome: None,
     CsMyDriverComponent: None,
     CsMyUCinit: {
-        'default_args': {'./profiles/userB'}
+        'default_kwargs': {'_user_data_dir': STR_DOWNLOADS_FOLDER_PATH + '\\UCProfile', 'user_profile_name': 'UserA'}
     },
     CsMyUCGooglePhotoUploader: None
     # CsLoaderComponent: {
